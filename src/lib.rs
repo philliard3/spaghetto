@@ -2,6 +2,9 @@ use std::alloc::Layout;
 use std::fmt::Debug;
 use std::ptr::NonNull;
 
+// #[cfg(test)]
+// mod property_tests;
+
 // a silly little guy
 pub type Spaghetto<T> = DeVec<T, FrontToBack, Middle>;
 
@@ -457,7 +460,6 @@ where
             None => std::alloc::handle_alloc_error(new_layout),
         };
 
-        // TODO: shift elements to new start location
         if self.start != new_start {
             unsafe {
                 let old_start_ptr = self.ptr.as_ptr().add(self.start);
@@ -485,8 +487,7 @@ where
             self.len += 1;
             return;
         }
-        // TODO: adjust this to account for front not being 0
-        // I believe this will be
+
         while self.len + self.start >= self.cap {
             // if we're at the end of the buffer
             // if self.len == self.cap {
@@ -566,8 +567,6 @@ where
             }
 
             unsafe {
-                // TODO: change to account for self.start not being 0
-                // so it should be self.ptr.as_ptr().add(self.len + self.start)
                 Some(std::ptr::read(self.ptr.as_ptr().add(self.start + self.len)))
             }
         }
@@ -935,6 +934,7 @@ where
     #[inline]
     // TODO: should this be must_use?
     pub fn remove(&mut self, index: usize) -> T {
+        // index is trivially >= 0 because it's a usize
         assert!(index < self.len, "index out of bounds");
         if index == 0 {
             return self.pop_front().unwrap();
@@ -952,6 +952,86 @@ where
         }
     }
 
+    /// Swaps the specified element with the last one, then pops the last one.
+    /// This will be faster than `remove` because it doesn't need to shift elements.
+    /// If you would like to smartly remove by moving either the first or the last depending on the current balance of the `DeVec`, then use `smart_swap_remove`.
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    /// # Examples
+    /// ```
+    /// # use spaghetto::DeVec;
+    /// let mut devec = DeVec::new();
+    /// devec.push_back(1);
+    /// devec.push_back(2);
+    /// devec.swap_remove(0);
+    /// assert_eq!(devec.as_slice(), &[2]);
+    /// ```
+    /// ```should_panic
+    /// # use spaghetto::DeVec;
+    /// let mut devec = DeVec::new();
+    /// devec.push_back(1);
+    /// devec.push_back(2);
+    /// devec.swap_remove(3);
+    /// ```
+    #[inline]
+    pub fn swap_remove(&mut self, index: usize) -> T {
+        assert!(index < self.len, "index out of bounds");
+        // subtraction can never overflow because then index == 0 == len and that would already have panicked
+        if index == self.len - 1 {
+            return self.pop_back().unwrap();
+        }
+        let last_index = self.len - 1;
+        self.as_mut_slice().swap(index, last_index);
+        // this can never panic because otherwise index would be equal to len
+        self.pop_back().unwrap()
+    }
+    
+    /// Swaps the specified element with the first or last one, depending on which one is closer to the end of the buffer.
+    /// for a simpler version that always swaps with the back like `Vec::swap_remove`, use `swap_remove`.
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    /// # Examples
+    /// ```
+    /// # use spaghetto::DeVec;
+    /// let mut devec = DeVec::new();
+    /// devec.push_back(1);
+    /// devec.push_back(2);
+    /// devec.smart_swap_remove(0);
+    /// assert_eq!(devec.as_slice(), &[2]);
+    /// ```
+    /// ```should_panic
+    /// # use spaghetto::DeVec;
+    /// let mut devec = DeVec::new();
+    /// devec.push_back(1);
+    /// devec.push_back(2);
+    /// devec.smart_swap_remove(3);
+    /// ```
+    #[inline]
+    pub fn smart_swap_remove(&mut self, index: usize) -> T {
+        assert!(index < self.len, "index out of bounds");
+        if index == 0 {
+            return self.pop_front().unwrap();
+        }
+        if index == self.len - 1 {
+            return self.pop_back().unwrap();
+        }
+
+        let front_space = self.space_front();
+        let back_space = self.space_back();
+        if front_space > back_space {
+            // move the last to the back and pop it so the back gets more room
+            let last_index = self.len - 1;
+            self.as_mut_slice().swap(index, last_index);
+            self.pop_back().unwrap()
+        } else {
+            // move the first element to the back
+            let first_index = 0;
+            self.as_mut_slice().swap(first_index, index);
+            self.pop_front().unwrap()
+        }
+    }
+
+    /// Internal method for draining a range of elements from the `DeVec`.
     #[inline]
     fn drain_inner(&mut self, range: std::ops::Range<usize>) -> Drain<'_, T, DropOrder, Rebalance> {
         let start = range.start;
