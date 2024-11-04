@@ -48,6 +48,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Debug::fmt(self.as_slice(), f)
     }
@@ -107,8 +108,8 @@ impl<T> DeVec<T, FrontToBack> {
     /// devec.push_back(2);
     /// assert_eq!(&*devec, &[1, 2]);
     /// ```
-    pub fn new() -> Self {
-        // assert!(std::mem::size_of::<T>() != 0, "We're not ready to handle ZSTs");
+    #[inline]
+    pub const fn new() -> Self {
         let cap = if std::mem::size_of::<T>() == 0 {
             usize::MAX
         } else {
@@ -135,6 +136,8 @@ impl<T> DeVec<T, FrontToBack> {
     /// let devec = devec.as_back_to_front();
     /// assert_eq!(&*devec, &[2, 1]);
     /// ```
+    #[inline]
+    #[must_use = "This DeVec's drop order has been changed. Please make sure to use the new DeVec or drop it explicitly."]
     pub fn as_back_to_front(self) -> DeVec<T, BackToFront> {
         let this = std::mem::ManuallyDrop::new(self);
         DeVec {
@@ -147,6 +150,8 @@ impl<T> DeVec<T, FrontToBack> {
         }
     }
 
+    #[inline]
+    #[must_use = "This DeVec's rebalance behavior has been changed. Please make sure to use the new DeVec or drop it explicitly."]
     pub fn as_middle(self) -> DeVec<T, FrontToBack, Middle> {
         let this = std::mem::ManuallyDrop::new(self);
         DeVec {
@@ -176,6 +181,8 @@ where
     /// devec.push_back(2);
     /// assert_eq!(&*devec, &[1, 2]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn new_with_drop_order<D>() -> DeVec<T, D>
     where
         D: DropBehavior + Default,
@@ -195,6 +202,8 @@ where
         }
     }
 
+    #[inline]
+    #[must_use]
     pub fn new_with_rebalance_behavior<R>() -> DeVec<T, DropOrder, R>
     where
         R: RebalanceBehavior + Default,
@@ -235,6 +244,8 @@ where
     /// devec.push_back(());
     /// assert!(devec.capacity() >= 10);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn with_capacity(cap: usize) -> Self {
         // assert!(std::mem::size_of::<T>() != 0, "We're not ready to handle ZSTs");
         let (cap, ptr) = if std::mem::size_of::<T>() == 0 {
@@ -270,6 +281,8 @@ where
     /// devec.push_back(2);
     /// assert_eq!(&*devec, &[1, 2]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn with_capacity_and_drop_order<D>(cap: usize) -> DeVec<T, D>
     where
         D: DropBehavior + Default,
@@ -288,6 +301,8 @@ where
     /// devec.with_drop_order::<BackToFront>();
     /// assert_eq!(&*devec, &[2, 1]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn with_drop_order<D>(self) -> DeVec<T, D, Rebalance>
     where
         D: DropBehavior,
@@ -305,6 +320,8 @@ where
 
     /// Changes the rebalance behavior of the `DeVec` to the specified behavior in-place.
     ///
+    #[inline]
+    #[must_use]
     pub fn with_rebalance_behavior<R>(self) -> DeVec<T, DropOrder, R>
     where
         R: RebalanceBehavior,
@@ -327,7 +344,8 @@ where
     Rebalance: RebalanceBehavior,
 {
     // Grows the vector by doubling the capacity.
-    // Currently it also shifts elements slightly to the side that was lopsided. In the event of a tie it chooses the start of the buffer.
+    // Currently it also shifts elements slightly to the side that was lopsided. In the event of a tie it chooses the start of the buffer.    
+    #[inline]
     fn grow(&mut self) {
         // since we set the capacity to usize::MAX when T has size 0,
         // getting to here necessarily means the Vec is overfull.
@@ -461,6 +479,7 @@ where
     /// vec.push_back(100);
     /// assert_eq!(vec.pop_back(), Some(100));
     /// ```
+    #[inline]
     pub fn push_back(&mut self, elem: T) {
         if std::mem::size_of::<T>() == 0 {
             self.len += 1;
@@ -493,6 +512,7 @@ where
     /// vec.push_front(100);
     /// assert_eq!(vec.pop_front(), Some(100));
     /// ```
+    #[inline]
     pub fn push_front(&mut self, elem: T) {
         if std::mem::size_of::<T>() == 0 {
             self.len += 1;
@@ -532,6 +552,7 @@ where
     /// assert_eq!(vec.pop_back(), Some(42));
     /// assert_eq!(vec.pop_back(), None);
     /// ```
+    #[inline]
     pub fn pop_back(&mut self) -> Option<T> {
         if self.len == 0 {
             None
@@ -562,6 +583,7 @@ where
     /// assert_eq!(vec.pop_front(), Some(10));
     /// assert_eq!(vec.pop_front(), None);
     /// ```
+    #[inline]
     pub fn pop_front(&mut self) -> Option<T> {
         if self.len == 0 {
             None
@@ -593,13 +615,15 @@ where
     /// assert!(vec.capacity() >= 10);
     /// assert_eq!(vec.len(), 1);
     /// ```
-    pub fn len(&self) -> usize {
+    #[inline]
+     pub fn len(&self) -> usize {
         self.len
     }
 
     /// Returns the total capacity of the `DeVec`. This is less than or equal to the number of elements that it can hold.
     /// A DeVec tends to re-allocate with space on either side, so there is less room on either side than in a Vec with the same capacity.
-    pub fn capacity(&self) -> usize {
+    #[inline]
+     pub fn capacity(&self) -> usize {
         self.cap
     }
 
@@ -613,6 +637,7 @@ where
     /// assert!(vec.remaining_space_front() > 1);
     /// assert!(vec.remaining_space_front() < vec.capacity());
     /// ```
+    #[inline]
     pub fn space_front(&self) -> usize {
         self.start
     }
@@ -628,6 +653,7 @@ where
     /// assert!(vec.remaining_space_back() > 1);
     /// assert!(vec.remaining_space_back() < vec.capacity());
     /// ```
+    #[inline]
     pub fn space_back(&self) -> usize {
         self.cap - (self.start + self.len)
     }
@@ -643,6 +669,7 @@ where
     /// assert_eq!(vec.len(), 1);
     /// assert!(vec.starting_offset() > 0);
     /// ```
+    #[inline]
     pub fn starting_offset(&self) -> usize {
         self.start
     }
@@ -658,6 +685,8 @@ where
     /// v.push_back(1);
     /// assert!(!v.is_empty());
     /// ```
+    #[inline]
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
@@ -673,6 +702,7 @@ where
     /// devec.clear();
     /// assert!(devec.is_empty());
     /// ```
+    #[inline]
     pub fn clear(&mut self) {
         while (if DropOrder::IS_INVERTED {
             self.pop_back()
@@ -696,6 +726,7 @@ where
     /// devec.clear_with_order(true);
     /// assert!(devec.is_empty());
     /// ```
+    #[inline]
     pub fn clear_with_order(&mut self, drop_from_back: bool) {
         while (if drop_from_back {
             self.pop_back()
@@ -718,6 +749,8 @@ where
     /// devec.push_back(2);
     /// assert_eq!(devec.as_slice(), &[1, 2]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn as_slice(&self) -> &[T] {
         self
     }
@@ -733,6 +766,8 @@ where
     /// devec.as_mut_slice()[0] = 3;
     /// assert_eq!(devec.as_slice(), &[3, 2]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         self
     }
@@ -751,6 +786,7 @@ where
     ///    assert_eq!(*ptr.add(start), 1);
     /// }
     /// ```
+    #[inline]
     pub fn as_ptr(&self) -> *const T {
         self.ptr.as_ptr()
     }
@@ -769,6 +805,7 @@ where
     ///   *ptr.add(start) = 2;
     /// }
     /// ```
+    #[inline]
     pub fn as_mut_ptr(&mut self) -> *mut T {
         self.ptr.as_ptr()
     }
@@ -790,6 +827,7 @@ where
     /// assert!(devec.capacity() >= 12);
     /// ```
     // TODO: is OOM a panic?
+    #[inline]
     pub fn reserve_back(&mut self, additional: usize) {
         while self.cap - (self.start + self.len) < additional {
             self.grow();
@@ -812,6 +850,7 @@ where
     /// devec.reserve_front(10);
     /// assert!(devec.capacity() >= 12);
     /// ```
+    #[inline]
     pub fn reserve_front(&mut self, additional: usize) {
         while self.start < additional {
             self.grow();
@@ -839,6 +878,7 @@ where
     /// devec.insert(3, 3);
     /// ```
     // TODO: tests for insert
+    #[inline]
     pub fn insert(&mut self, index: usize, elem: T) {
         assert!(index <= self.len, "index out of bounds");
         if index == self.len {
@@ -892,6 +932,8 @@ where
     /// assert_eq!(devec.remove(1), 2);
     /// assert_eq!(devec.as_slice(), &[1]);
     /// ```
+    #[inline]
+    // TODO: should this be must_use?
     pub fn remove(&mut self, index: usize) -> T {
         assert!(index < self.len, "index out of bounds");
         if index == 0 {
@@ -910,6 +952,7 @@ where
         }
     }
 
+    #[inline]
     fn drain_inner(&mut self, range: std::ops::Range<usize>) -> Drain<'_, T, DropOrder, Rebalance> {
         let start = range.start;
         let end = range.end;
@@ -939,6 +982,7 @@ where
     /// assert_eq!(removed, [2, 3, 4]);
     /// assert_eq!(devec.as_slice(), &[1, 5]);
     /// ```
+    #[inline]
     pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, DropOrder, Rebalance>
     where
         R: std::ops::RangeBounds<usize>,
@@ -965,6 +1009,7 @@ where
     /// assert_eq!(removed.as_slice(), &[2, 4]);
     /// assert_eq!(devec.as_slice(), &[1, 3, 5]);
     /// ```
+    #[inline]
     pub fn extract_if<F>(&mut self, f: F) -> ExtractIf<T, DropOrder, F, Rebalance>
     where
         F: FnMut(usize, &mut T) -> bool,
@@ -989,6 +1034,7 @@ where
     /// devec.retain_mut(|elem| *elem % 2 == 0);
     /// assert_eq!(devec.as_slice(), &[2, 4]);
     /// ```
+    #[inline]
     pub fn retain_mut<F>(&mut self, mut f: F)
     where
         F: FnMut(&mut T) -> bool,
@@ -1011,6 +1057,8 @@ where
     /// devec.push_back(1);
     /// let (ptr, start, len, cap) = devec.into_raw_parts();
     /// ```
+    #[inline]
+    #[must_use]
     pub fn into_raw_parts(self) -> (*mut T, usize, usize, usize) {
         let ptr = self.ptr.as_ptr();
         let start = self.start;
@@ -1031,6 +1079,8 @@ where
     /// let (ptr, start, len, cap) = devec.into_raw_parts();
     /// let devec : DeVec<i32> = unsafe { DeVec::from_raw_parts(ptr, start, len, cap) };
     /// ```
+    #[inline]
+    #[must_use]
     pub unsafe fn from_raw_parts(ptr: *mut T, start: usize, len: usize, cap: usize) -> Self {
         DeVec {
             ptr: NonNull::new(ptr).unwrap(),
@@ -1054,13 +1104,16 @@ where
     /// devec.copy_from_slice(&[1, 2, 3]);
     /// assert_eq!(devec.as_slice(), &[1, 2, 3]);
     /// ```
+    #[inline]
     pub fn copy_from_slice(&mut self, other: &[T])
     where
         T: Copy,
     {
         self.reserve_back(other.len());
         unsafe {
-            std::ptr::copy(
+            // SAFETY: the DeVec has reserved enough space for the slice.
+            // SAFETY: We have a &mut to the DeVec, so we know that `other` is not aliasing the inside of this DeVec. 
+            std::ptr::copy_nonoverlapping(
                 other.as_ptr(),
                 self.ptr.as_ptr().add(self.start + self.len),
                 other.len(),
@@ -1081,6 +1134,7 @@ where
     /// devec.extend_from_slice(&[1, 2, 3]);
     /// assert_eq!(devec.as_slice(), &[1, 2, 3]);
     /// ```
+    #[inline]
     pub fn extend_from_slice(&mut self, other: &[T])
     where
         T: Clone,
@@ -1106,6 +1160,7 @@ where
     /// let new_space_back = devec.space_back();
     /// assert!(new_space_back >= old_space_back);
     /// ```
+    #[inline]
     pub fn rebalance(&mut self) {
         let midpoint = self.len / 2;
         let new_start = self.cap / 2 - midpoint;
@@ -1133,6 +1188,8 @@ where
     /// let slice = devec.leak();
     /// assert_eq!(slice, &[1, 2]);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn leak<'a>(self) -> &'a mut [T] {
         unsafe {
             let slice = std::slice::from_raw_parts_mut(self.ptr.as_ptr().add(self.start), self.len);
@@ -1155,6 +1212,8 @@ where
     /// assert!(front.len() >= 4);
     /// assert!(back.len() >= 4);
     /// ```
+    #[inline]
+    #[must_use]
     pub fn spare_capacity_mut(
         &mut self,
     ) -> (
@@ -1184,12 +1243,19 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+
+    #[inline]
     fn default() -> Self {
+        let cap = if std::mem::size_of::<T>() == 0 {
+            usize::MAX
+        } else {
+            0
+        };
         DeVec {
             ptr: NonNull::dangling(),
             start: 0,
             len: 0,
-            cap: 0,
+            cap,
             drop_order: DropOrder::default(),
             rebalance: Rebalance::default(),
         }
@@ -1212,6 +1278,7 @@ where
     type Item = T;
     type IntoIter = IntoIter<T, DropOrder, Rebalance>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         IntoIter { devec: self }
     }
@@ -1225,6 +1292,7 @@ where
     type Item = &'a T;
     type IntoIter = std::slice::Iter<'a, T>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.as_slice().iter()
     }
@@ -1238,6 +1306,7 @@ where
     type Item = &'a mut T;
     type IntoIter = std::slice::IterMut<'a, T>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         self.as_mut_slice().iter_mut()
     }
@@ -1250,6 +1319,7 @@ where
 {
     type Item = T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if self.devec.is_empty() {
             None
@@ -1263,11 +1333,19 @@ where
     }
 }
 
+impl<T, DropOrder, Rebalance> std::iter::FusedIterator for IntoIter<T, DropOrder, Rebalance>
+where
+    DropOrder: DropBehavior,
+    Rebalance: RebalanceBehavior,
+{
+}
+
 impl<T, DropOrder, Rebalance> ExactSizeIterator for IntoIter<T, DropOrder, Rebalance>
 where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn len(&self) -> usize {
         self.devec.len()
     }
@@ -1278,6 +1356,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.devec.pop_back()
     }
@@ -1288,6 +1367,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn drop(&mut self) {
         if std::mem::size_of::<T>() == 0 {
             // there's nothing to drop because we do not allocate if T is a ZST
@@ -1315,6 +1395,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn clone(&self) -> Self {
         let mut new: DeVec<T, DropOrder, Rebalance> = DeVec::with_capacity(self.cap);
         new.len = self.len;
@@ -1342,6 +1423,7 @@ where
     Rebalance: RebalanceBehavior,
 {
     type Target = [T];
+    #[inline]
     fn deref(&self) -> &[T] {
         unsafe { std::slice::from_raw_parts(self.ptr.as_ptr().add(self.start), self.len) }
     }
@@ -1352,6 +1434,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
         unsafe { std::slice::from_raw_parts_mut(self.ptr.as_ptr().add(self.start), self.len) }
     }
@@ -1363,6 +1446,7 @@ where
     Rebalance: RebalanceBehavior,
 {
     type Output = <[T] as std::ops::Index<R>>::Output;
+    #[inline]
     fn index(&self, index: R) -> &Self::Output {
         self.as_slice().index(index)
     }
@@ -1373,6 +1457,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn as_ref(&self) -> &[T] {
         self
     }
@@ -1383,6 +1468,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn as_mut(&mut self) -> &mut [T] {
         self
     }
@@ -1393,6 +1479,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn borrow(&self) -> &[T] {
         self
     }
@@ -1403,6 +1490,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn borrow_mut(&mut self) -> &mut [T] {
         self
     }
@@ -1415,6 +1503,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.as_slice().serialize(serializer)
     }
@@ -1427,6 +1516,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn deserialize<D: serde::Deserializer<'src>>(deserializer: D) -> Result<Self, D::Error> {
         let vec = Vec::<T>::deserialize(deserializer)?;
         Ok(DeVec::from(vec).with_drop_order().with_rebalance_behavior())
@@ -1451,6 +1541,7 @@ where
 {
     type Item = T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if self.current == self.target {
             None
@@ -1467,6 +1558,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn drop(&mut self) {
         // TODO: should I bother changing the drop order? for now I always drop from the front
         // drop all remaining elements
@@ -1515,6 +1607,7 @@ where
 {
     type Item = T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         while self.current_index < self.devec.len {
             let current_index = self.current_index;
@@ -1570,6 +1663,7 @@ where
     R: RebalanceBehavior,
     F: FnMut(usize, &mut T) -> bool,
 {
+    #[inline]
     fn drop(&mut self) {
         // drop all remaining elements
         for _ in self.by_ref() {}
@@ -1581,6 +1675,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         DeVec::from(iter.into_iter().collect::<Vec<T>>())
             .with_drop_order()
@@ -1593,6 +1688,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         for item in iter {
             self.push_back(item);
@@ -1601,6 +1697,7 @@ where
 }
 
 impl<T> From<Vec<T>> for DeVec<T> {
+    #[inline]
     fn from(vec: Vec<T>) -> Self {
         let (ptr, len, cap) = (vec.as_ptr(), vec.len(), vec.capacity());
         std::mem::forget(vec);
@@ -1616,6 +1713,7 @@ impl<T> From<Vec<T>> for DeVec<T> {
 }
 
 impl<T, const N: usize> From<[T; N]> for DeVec<T> {
+    #[inline]
     fn from(array: [T; N]) -> Self {
         From::from(Vec::from(array))
     }
@@ -1659,6 +1757,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.len() == other.len() && self.iter().eq(other.iter())
     }
@@ -1670,6 +1769,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn eq(&self, other: &[T]) -> bool {
         self.len() == other.len() && self.iter().eq(other.iter())
     }
@@ -1689,6 +1789,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.iter().partial_cmp(other.iter())
     }
@@ -1700,6 +1801,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn partial_cmp(&self, other: &[T]) -> Option<std::cmp::Ordering> {
         self.iter().partial_cmp(other.iter())
     }
@@ -1711,6 +1813,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.iter().cmp(other.iter())
     }
@@ -1722,6 +1825,7 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.as_slice().hash(state);
     }
@@ -1732,11 +1836,13 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
+    #[inline]
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.copy_from_slice(buf);
         Ok(buf.len())
     }
 
+    #[inline]
     fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
     }
@@ -1760,9 +1866,9 @@ pub struct DeString {
     devec: DeVec<u8>,
 }
 
-/// A string type that uses a DeVec internally.
+/// A string type that uses a `DeVec` internally.
 /// This type is similar to `String` but uses a `DeVec<u8>` internally instead of a `Vec<u8>`.
-/// This allows it to use the DeVec's double-endedness to provide efficient push/pop operations on both ends, while keeping a single contiguous string slice.
+/// This allows it to use the `DeVec`'s double-endedness to provide efficient push/pop operations on both ends, while keeping a single contiguous string slice.
 ///
 /// # Examples
 /// ```
@@ -1773,33 +1879,35 @@ pub struct DeString {
 /// assert_eq!(destring.as_str(), "world hello");
 /// ```
 impl DeString {
-    /// Creates a new empty DeString.
+    /// Creates a new empty `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
     /// let destring = DeString::new();
     /// assert_eq!(destring.as_str(), "");
     /// ```
-    pub fn new() -> Self {
+    #[inline]
+    pub const fn new() -> Self {
         DeString {
             devec: DeVec::new(),
         }
     }
 
-    /// Creates a new DeString with at least the specified capacity.
+    /// Creates a new `DeString` with at least the specified capacity.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
     /// let destring = DeString::with_capacity(10);
     /// assert!(destring.capacity() >= 10);
     /// ```
+    #[inline]
     pub fn with_capacity(cap: usize) -> Self {
         DeString {
             devec: DeVec::with_capacity(cap),
         }
     }
 
-    /// Appends a character to the end of the DeString.
+    /// Appends a character to the end of the `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1809,6 +1917,7 @@ impl DeString {
     /// destring.push_char_back('o');
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
+    #[inline]
     pub fn push_char_back(&mut self, c: char) {
         let mut buf = [0; 4];
         self.devec.reserve_back(4);
@@ -1818,7 +1927,7 @@ impl DeString {
         }
     }
 
-    /// Appends a character to the front of the DeString.
+    /// Appends a character to the front of the `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1826,6 +1935,7 @@ impl DeString {
     /// destring.push_char_front('h');
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
+    #[inline]
     pub fn push_char_front(&mut self, c: char) {
         let mut buf = [0; 4];
         self.devec.reserve_front(4);
@@ -1835,7 +1945,7 @@ impl DeString {
         }
     }
 
-    /// Removes the last character from the DeString and returns it, if it exists.
+    /// Removes the last character from the `DeString` and returns it, if it exists.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1849,6 +1959,7 @@ impl DeString {
     /// assert_eq!(destring.pop_back(), None);
     /// assert_eq!(destring.as_str(), "");
     /// ```
+    #[inline]
     pub fn pop_back(&mut self) -> Option<char> {
         let my_str = self.as_str();
         let len = self.devec.len();
@@ -1859,7 +1970,7 @@ impl DeString {
         Some(last_char)
     }
 
-    /// Removes the first character from the DeString and returns it, if it exists.
+    /// Removes the first character from the `DeString` and returns it, if it exists.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1873,6 +1984,7 @@ impl DeString {
     /// assert_eq!(destring.pop_front(), None);
     /// assert_eq!(destring.as_str(), "");
     /// ```
+    #[inline]
     pub fn pop_front(&mut self) -> Option<char> {
         let my_str = self.as_str();
         let mut char_indices = my_str.char_indices();
@@ -1883,7 +1995,7 @@ impl DeString {
         Some(first_char)
     }
 
-    /// Appends the contents of a string to the end of the DeString.
+    /// Appends the contents of a string to the end of the `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1891,6 +2003,7 @@ impl DeString {
     /// destring.push_str_back(" world");
     /// assert_eq!(destring.as_str(), "hello world");
     /// ```
+    #[inline]
     pub fn push_str_back(&mut self, s: &str) {
         // for c in s.chars() {
         //     self.push_char(c);
@@ -1902,6 +2015,7 @@ impl DeString {
             self.devec.push_back(b);
         }
         // TODO: we may be able to do even better if we just copy the bytes directly
+        // TODO: (this means use the DeVec's buffer directly and copy from slice)
     }
 
     /// Prepends the contents of a string to the front of the DeString.
@@ -1912,6 +2026,7 @@ impl DeString {
     /// destring.push_str_front("hello ");
     /// assert_eq!(destring.as_str(), "hello world");
     /// ```
+    #[inline]
     pub fn push_str_front(&mut self, s: &str) {
         // for c in s.chars().rev() {
         //     self.push_char(c);
@@ -1925,13 +2040,14 @@ impl DeString {
         // TODO: we can do even better if we just copy the bytes directly
     }
 
-    /// Returns the number of bytes in the DeString.
+    /// Returns the number of bytes in the `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.len(), 5);
     /// ```
+    #[inline]
     pub fn len(&self) -> usize {
         self.devec.len()
     }
@@ -1943,11 +2059,12 @@ impl DeString {
     /// let destring = DeString::with_capacity(10);
     /// assert!(destring.capacity() >= 10);
     /// ```
+    #[inline]
     pub fn capacity(&self) -> usize {
         self.devec.capacity()
     }
 
-    /// Returns true if the DeString is empty.
+    /// Returns true if the `DeString` is empty.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1959,11 +2076,12 @@ impl DeString {
     /// let destring = DeString::from("hello");
     /// assert!(!destring.is_empty());
     /// ```
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.devec.is_empty()
     }
 
-    /// Removes all bytes from the DeString.
+    /// Removes all bytes from the `DeString`.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1971,22 +2089,25 @@ impl DeString {
     /// destring.clear();
     /// assert!(destring.is_empty());
     /// ```
+    #[inline]
     pub fn clear(&mut self) {
         self.devec.clear();
     }
 
-    /// Returns a reference to the string slice that the DeString manages.
+    /// Returns a reference to the string slice that the `DeString` manages.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
+    #[inline]
     pub fn as_str(&self) -> &str {
+        // SAFETY: we know that the `DeString`'s buffer is a valid UTF-8 string because we only ever push valid UTF-8 bytes to it in the form of `char`s and `&str`s
         unsafe { std::str::from_utf8_unchecked(&self.devec) }
     }
 
-    /// Returns a mutable reference to the string slice that the DeString manages.
+    /// Returns a mutable reference to the string slice that the `DeString` manages.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -1995,6 +2116,7 @@ impl DeString {
     /// destr.make_ascii_lowercase();
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
+    #[inline]
     pub fn as_mut_str(&mut self) -> &mut str {
         unsafe { std::str::from_utf8_unchecked_mut(&mut self.devec) }
     }
@@ -2006,6 +2128,7 @@ impl DeString {
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.as_bytes(), b"hello");
     /// ```
+    #[inline]
     pub fn as_bytes(&self) -> &[u8] {
         &self.devec
     }
@@ -2013,9 +2136,9 @@ impl DeString {
     /// Returns a mutable reference to the underlying `DeVec<u8>` buffer.
     /// This is useful for when you want to manipulate the buffer directly.
     /// # Safety
-    /// This function is unsafe because it exposes the internal buffer of the DeString.
-    /// It is possible to corrupt the DeString by manipulating the buffer directly.
-    /// It is also possible to manipulate it to create a DeString that is not a valid UTF-8 string.
+    /// This function is unsafe because it exposes the internal buffer of the `DeString`.
+    /// It is possible to corrupt the `DeString` by manipulating the buffer directly.
+    /// It is also possible to manipulate it to create a `DeString` that is not a valid UTF-8 string.
     ///
     /// # Examples
     /// ```
@@ -2030,11 +2153,12 @@ impl DeString {
     /// devec.push_back(b'd');
     /// assert_eq!(destring.as_str(), "hello world");
     /// ```
+    #[inline]
     pub unsafe fn as_mut_devec(&mut self) -> &mut DeVec<u8> {
         &mut self.devec
     }
 
-    /// Mutates the DeString by removing leading whitespace. The double-ended nature of the data structure means this can be done in-place.
+    /// Mutates the `DeString` by removing leading whitespace. The double-ended nature of the data structure means this can be done in-place.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -2045,14 +2169,17 @@ impl DeString {
     /// assert_eq!(destring.as_str(), "hello");
     /// assert!(std::ptr::eq(original_ptr, new_ptr));
     /// ```
+    #[inline]
     pub fn mut_trim_front(&mut self) {
         let new_str = self.as_str().trim_start();
         let new_start = self.len() - new_str.len();
+        // TODO: does this get properly inlined so that it becomes a single operation that changes the boundaries?
+        //  If it does not, then we should do that truncation directly
         let drain = self.devec.drain(0..new_start);
         drop(drain);
     }
 
-    /// Mutates the DeString by removing trailing whitespace.
+    /// Mutates the `DeString` by removing trailing whitespace.
     /// # Examples
     /// ```
     /// # use spaghetto::DeString;
@@ -2063,14 +2190,17 @@ impl DeString {
     /// assert_eq!(destring.as_str(), "hello");
     /// assert!(std::ptr::eq(original_ptr, new_ptr));
     /// ```
+    #[inline]
     pub fn mut_trim_back(&mut self) {
         let new_str = self.as_str().trim_end();
         let new_end = new_str.len();
+        // TODO: does this get properly inlined so that it becomes a single operation that changes the boundaries?
+        //  If it does not, then we should do that truncation directly
         let drain = self.devec.drain(new_end..self.len());
         drop(drain);
     }
 
-    /// Mutates the DeString by removing leading and trailing whitespace.
+    /// Mutates the `DeString` by removing leading and trailing whitespace.
     /// The double-ended nature of the data structure means this can be done in-place.
     /// # Examples
     /// ```
@@ -2082,12 +2212,13 @@ impl DeString {
     /// assert_eq!(destring.as_str(), "hello");
     /// assert!(std::ptr::eq(original_ptr, new_ptr));
     /// ```
+    #[inline]
     pub fn mut_trim(&mut self) {
         self.mut_trim_front();
         self.mut_trim_back();
     }
 
-    /// Parses the DeString as a UTF-8 string. This returns Err if the DeVec input is not a valid UTF-8 string.
+    /// Parses the `DeString` as a UTF-8 string. This returns `Err` if the `DeVec` input is not a valid UTF-8 string.
     /// # Examples
     /// ```
     /// # use spaghetto::{DeVec, DeString};
@@ -2101,6 +2232,7 @@ impl DeString {
     /// let destring = DeString::from_utf8(devec);
     /// destring.expect("this should panic");
     /// ```
+    #[inline]
     pub fn from_utf8(devec: DeVec<u8>) -> Result<Self, std::str::Utf8Error> {
         let _ = std::str::from_utf8(&devec)?;
         Ok(DeString { devec })
@@ -2116,6 +2248,7 @@ impl DeString {
     /// let destring = unsafe { DeString::from_utf8_unchecked(devec) };
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
+    #[inline]
     pub unsafe fn from_utf8_unchecked(devec: DeVec<u8>) -> Self {
         DeString { devec }
     }
@@ -2130,6 +2263,7 @@ impl DeString {
     /// assert_eq!(drained_values.as_str(), "world");
     /// assert_eq!(destring.as_str(), "hello ");
     /// ```
+    #[inline]
     pub fn drain<R>(&mut self, range: R) -> destring_drain::Drain<'_>
     where
         R: std::ops::RangeBounds<usize>,
@@ -2159,23 +2293,27 @@ impl DeString {
 }
 
 impl Default for DeString {
+    #[inline]
     fn default() -> Self {
         DeString::new()
     }
 }
 
 impl Debug for DeString {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Debug::fmt(self.as_str(), f)
     }
 }
 
 impl std::fmt::Write for DeString {
+    #[inline]
     fn write_str(&mut self, s: &str) -> std::fmt::Result {
         self.push_str_back(s);
         Ok(())
     }
 
+    #[inline]
     fn write_char(&mut self, c: char) -> std::fmt::Result {
         self.push_char_back(c);
         Ok(())
@@ -2183,6 +2321,7 @@ impl std::fmt::Write for DeString {
 }
 
 impl std::fmt::Display for DeString {
+    #[inline]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.as_str(), f)
     }
@@ -2190,12 +2329,14 @@ impl std::fmt::Display for DeString {
 
 impl Deref for DeString {
     type Target = str;
+    #[inline]
     fn deref(&self) -> &str {
         self.as_str()
     }
 }
 
 impl DerefMut for DeString {
+    #[inline]
     fn deref_mut(&mut self) -> &mut str {
         self.mut_trim_back();
         self.as_mut_str()
@@ -2205,6 +2346,7 @@ impl DerefMut for DeString {
 impl std::ops::Add<&str> for DeString {
     type Output = DeString;
 
+    #[inline]
     fn add(mut self, rhs: &str) -> Self::Output {
         self.push_str_back(rhs);
         self
@@ -2212,6 +2354,7 @@ impl std::ops::Add<&str> for DeString {
 }
 
 impl std::ops::AddAssign<&str> for DeString {
+    #[inline]
     fn add_assign(&mut self, rhs: &str) {
         self.push_str_back(rhs);
     }
@@ -2222,18 +2365,21 @@ where
     R: std::slice::SliceIndex<str>,
 {
     type Output = <str as std::ops::Index<R>>::Output;
+    #[inline]
     fn index(&self, index: R) -> &Self::Output {
         self.as_str().index(index)
     }
 }
 
 impl std::borrow::Borrow<str> for DeString {
+    #[inline]
     fn borrow(&self) -> &str {
         self.as_str()
     }
 }
 
 impl std::borrow::BorrowMut<str> for DeString {
+    #[inline]
     fn borrow_mut(&mut self) -> &mut str {
         self.mut_trim_back();
         self.as_mut_str()
@@ -2241,12 +2387,14 @@ impl std::borrow::BorrowMut<str> for DeString {
 }
 
 impl std::borrow::Borrow<std::path::Path> for DeString {
+    #[inline]
     fn borrow(&self) -> &std::path::Path {
         std::path::Path::new(self.as_str())
     }
 }
 
 impl From<&str> for DeString {
+    #[inline]
     fn from(s: &str) -> Self {
         let mut destring = DeString::with_capacity(s.len());
         destring.devec.start = 0;
@@ -2256,6 +2404,7 @@ impl From<&str> for DeString {
 }
 
 impl From<String> for DeString {
+    #[inline]
     fn from(s: String) -> Self {
         // SAFETY: we know that the original buffer came from a String which is guaranteed to be valid UTF-8
         unsafe { Self::from_utf8_unchecked(s.into_bytes().into()) }
@@ -2263,12 +2412,14 @@ impl From<String> for DeString {
 }
 
 impl<'a> FromIterator<DeString> for std::borrow::Cow<'a, str> {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = DeString>>(iter: I) -> Self {
         std::borrow::Cow::Owned(iter.into_iter().collect())
     }
 }
 
 impl FromIterator<DeString> for String {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = DeString>>(iter: I) -> Self {
         let mut string = String::new();
         for s in iter {
@@ -2280,12 +2431,14 @@ impl FromIterator<DeString> for String {
 }
 
 impl FromIterator<String> for DeString {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = String>>(iter: I) -> Self {
         iter.into_iter().collect::<String>().into()
     }
 }
 
 impl FromIterator<DeString> for DeString {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = DeString>>(iter: I) -> Self {
         let mut destring = DeString::new();
         for s in iter {
@@ -2297,6 +2450,7 @@ impl FromIterator<DeString> for DeString {
 }
 
 impl FromIterator<char> for DeString {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
         let s: String = iter.into_iter().collect();
         DeString::from(s)
@@ -2304,6 +2458,7 @@ impl FromIterator<char> for DeString {
 }
 
 impl<'a> FromIterator<&'a char> for DeString {
+    #[inline]
     fn from_iter<I: IntoIterator<Item = &'a char>>(iter: I) -> Self {
         iter.into_iter().copied().collect()
     }
@@ -2312,60 +2467,85 @@ impl<'a> FromIterator<&'a char> for DeString {
 impl std::str::FromStr for DeString {
     type Err = std::string::ParseError;
 
+    #[inline]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(DeString::from(s))
     }
 }
 
 impl std::convert::From<DeString> for String {
+    #[inline]
     fn from(value: DeString) -> String {
-        value.as_str().to_string()
+        // value.as_str().to_string()
+        // SAFETY: we know that the underlying DeVec has the correct length for the bytes we want to copy
+        // copy the overlapping bytes from the inner DeVec to the front of its buffer
+        let raw_parts: (*mut u8, usize, usize, usize) = value.devec.into_raw_parts();
+        let (ptr, start, len, cap) = raw_parts;
+        let start_of_buf = ptr;
+        let start_of_valid_region = unsafe { ptr.add(start) };
+        let length_to_copy = len;
+        // write bytes
+        unsafe {
+            std::ptr::copy(start_of_valid_region, start_of_buf, length_to_copy);
+        }
+        // create a new String from the raw parts
+        // TODO: we copied valid utf8 bytes, and we know that the allocation was originally made for with a cap of `cap` and an item type of `u8`
+        let string = unsafe { String::from_raw_parts(ptr, len, cap) };
+        string
     }
 }
 
 impl std::convert::From<DeString> for std::path::PathBuf {
+    #[inline]
     fn from(value: DeString) -> std::path::PathBuf {
-        std::path::PathBuf::from(value.as_str())
+        String::from(value).into()
     }
 }
 
 impl PartialEq for DeString {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         self.as_str() == other.as_str()
     }
 }
 
 impl<'a> PartialEq<&'a str> for DeString {
+    #[inline]
     fn eq(&self, other: &&'a str) -> bool {
         self.as_str() == *other
     }
 }
 
 impl PartialEq<str> for DeString {
+    #[inline]
     fn eq(&self, other: &str) -> bool {
         self.as_str() == other
     }
 }
 
 impl PartialEq<String> for DeString {
+    #[inline]
     fn eq(&self, other: &String) -> bool {
         self.as_str() == other.as_str()
     }
 }
 
 impl PartialEq<DeString> for str {
+    #[inline]
     fn eq(&self, other: &DeString) -> bool {
         self == other.as_str()
     }
 }
 
 impl PartialEq<DeString> for String {
+    #[inline]
     fn eq(&self, other: &DeString) -> bool {
         self.as_str() == other.as_str()
     }
 }
 
 impl<'a> PartialEq<DeString> for &'a str {
+    #[inline]
     fn eq(&self, other: &DeString) -> bool {
         *self == other.as_str()
     }
@@ -2374,30 +2554,35 @@ impl<'a> PartialEq<DeString> for &'a str {
 impl Eq for DeString {}
 
 impl PartialOrd for DeString {
+    #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl PartialOrd<str> for DeString {
+    #[inline]
     fn partial_cmp(&self, other: &str) -> Option<std::cmp::Ordering> {
         self.as_str().partial_cmp(other)
     }
 }
 
 impl PartialOrd<String> for DeString {
+    #[inline]
     fn partial_cmp(&self, other: &String) -> Option<std::cmp::Ordering> {
         self.as_str().partial_cmp(other.as_str())
     }
 }
 
 impl Ord for DeString {
+    #[inline]
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.as_str().cmp(other.as_str())
     }
 }
 
 impl std::hash::Hash for DeString {
+    #[inline]
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.as_str().hash(state);
     }
@@ -2413,6 +2598,7 @@ pub mod destring_drain {
     impl std::iter::Iterator for Drain<'_> {
         type Item = char;
 
+        #[inline]
         fn next(&mut self) -> Option<Self::Item> {
             // SAFETY: we know that the DeVec<u8> buffer is a valid UTF-8 string because this must have come from a DeString
             let inner_drain_start = self.inner_drain.current;
@@ -2431,7 +2617,17 @@ pub mod destring_drain {
             }
             Some(next_char)
         }
+
+        #[inline]
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            let remaining_bytes = self.inner_drain.target - self.inner_drain.current;
+            // every char is at least 1 byte and up to 4 bytes
+            ((remaining_bytes + 3) / 4, Some(remaining_bytes))
+        }
     }
+
+    impl std::iter::FusedIterator for Drain<'_> {}
+    
 }
 
 #[derive(Copy, Clone, Debug, Default)]
