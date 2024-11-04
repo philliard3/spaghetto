@@ -12,7 +12,7 @@ pub type Spaghetto<T> = DeVec<T, FrontToBack, Middle>;
 ///
 /// # Examples
 /// ```
-/// use shared::devec::DeVec;
+/// use spaghetto::DeVec;
 /// let mut devec = DeVec::new();
 /// devec.push_back(2);
 /// devec.push_front(1);
@@ -101,7 +101,7 @@ impl<T> DeVec<T, FrontToBack> {
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -128,7 +128,7 @@ impl<T> DeVec<T, FrontToBack> {
     /// This is useful when you need to drop items in the reverse order of insertion.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -170,7 +170,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new_with_drop_order::<BackToFront>();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -222,14 +222,14 @@ where
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
-    /// use shared::devec::DeVec;
+    /// use spaghetto::DeVec;
     /// let mut devec = DeVec::with_capacity(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
     /// assert!(devec.capacity() >= 10);
     /// ```
     /// ```
-    /// use shared::devec::DeVec;
+    /// use spaghetto::DeVec;
     /// let mut devec = DeVec::<()>::with_capacity(10);
     /// devec.push_back(());
     /// devec.push_back(());
@@ -264,7 +264,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::with_capacity_and_drop_order::<BackToFront>(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -281,7 +281,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -456,7 +456,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::from([42, 10]);
     /// vec.push_back(100);
     /// assert_eq!(vec.pop_back(), Some(100));
@@ -488,7 +488,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::from([42, 10]);
     /// vec.push_front(100);
     /// assert_eq!(vec.pop_front(), Some(100));
@@ -526,7 +526,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::from([42, 10]);
     /// assert_eq!(vec.pop_back(), Some(10));
     /// assert_eq!(vec.pop_back(), Some(42));
@@ -556,7 +556,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::from([42, 10]);
     /// assert_eq!(vec.pop_front(), Some(42));
     /// assert_eq!(vec.pop_front(), Some(10));
@@ -587,7 +587,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::with_capacity(10);
     /// vec.push_back(42);
     /// assert!(vec.capacity() >= 10);
@@ -620,7 +620,7 @@ where
     /// Returns the number of elements the `DeVec` can hold without reallocating.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::with_capacity(10);
     /// vec.push_back(42);
     /// assert!(vec.capacity() >= 10);
@@ -636,7 +636,7 @@ where
     /// This is the number of elements that are stored before the first element in the buffer.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::with_capacity(10);
     /// vec.push_back(42);
     /// assert!(vec.capacity() >= 10);
@@ -651,7 +651,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut v = DeVec::new();
     /// assert!(v.is_empty());
     ///
@@ -666,7 +666,7 @@ where
     /// Note that this method has no effect on the allocated capacity of the DeVec.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -689,7 +689,7 @@ where
     /// Note that this method has no effect on the allocated capacity of the DeVec.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -712,7 +712,7 @@ where
     /// Equivalent to `&s[..]`.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -726,7 +726,7 @@ where
     /// Equivalent to &mut `s[..]`.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -742,7 +742,7 @@ where
     /// The caller is responsible for upholding the integrity of the data structure when doing unsafe things with the pointer.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// let ptr = devec.as_ptr();
@@ -760,7 +760,7 @@ where
     /// The caller is responsible for upholding the integrity of the data structure when doing unsafe things with the pointer.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// let ptr = devec.as_mut_ptr();
@@ -782,7 +782,7 @@ where
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -805,7 +805,7 @@ where
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
-    /// use shared::devec::DeVec;
+    /// use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -824,7 +824,7 @@ where
     /// Panics if `index > len`.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -832,7 +832,7 @@ where
     /// assert_eq!(devec.as_slice(), &[1, 3, 2]);
     /// ```
     /// ```should_panic
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -885,7 +885,7 @@ where
     /// Panics if `index` is out of bounds.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -933,7 +933,7 @@ where
     /// Panics if the range is out of bounds.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec : DeVec<i32> = DeVec::from([1, 2, 3, 4, 5]);
     /// let removed: Vec<_> = devec.drain(1..4).collect();
     /// assert_eq!(removed, [2, 3, 4]);
@@ -959,7 +959,7 @@ where
     /// Removes the elements specified by the predicate function from the `DeVec` and returns an iterator over the removed elements.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec : DeVec<i32> = DeVec::from([1, 2, 3, 4, 5]);
     /// let removed: Vec<_> = devec.extract_if(|_, elem| *elem % 2 == 0).collect();
     /// assert_eq!(removed.as_slice(), &[2, 4]);
@@ -984,7 +984,7 @@ where
     /// In other words, remove all elements `x` such that `f(&mut x)` returns `false`.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec : DeVec<i32> = DeVec::from([1, 2, 3, 4, 5]);
     /// devec.retain_mut(|elem| *elem % 2 == 0);
     /// assert_eq!(devec.as_slice(), &[2, 4]);
@@ -1006,7 +1006,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// let (ptr, start, len, cap) = devec.into_raw_parts();
@@ -1025,7 +1025,7 @@ where
     /// The caller is responsible for ensuring that the raw components are valid.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// let (ptr, start, len, cap) = devec.into_raw_parts();
@@ -1049,7 +1049,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.copy_from_slice(&[1, 2, 3]);
     /// assert_eq!(devec.as_slice(), &[1, 2, 3]);
@@ -1076,7 +1076,7 @@ where
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.extend_from_slice(&[1, 2, 3]);
     /// assert_eq!(devec.as_slice(), &[1, 2, 3]);
@@ -1095,7 +1095,7 @@ where
     /// This can address imbalances in the buffer that may have been caused by repeated pushes or removals on one side.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec : DeVec<i32> = DeVec::with_capacity(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -1126,7 +1126,7 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeVec;
+    /// # use spaghetto::DeVec;
     /// let mut devec = DeVec::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -1146,7 +1146,7 @@ where
     /// The second element of the tuple is the remaining capacity on the back side of the buffer.
     /// # Examples
     /// ```
-    /// use shared::devec::DeVec;
+    /// use spaghetto::DeVec;
     /// let mut devec : DeVec<i32> = DeVec::with_capacity(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
@@ -1733,7 +1733,7 @@ where
     Rebalance: RebalanceBehavior,
 {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.extend_from_slice(buf);
+        self.copy_from_slice(buf);
         Ok(buf.len())
     }
 
@@ -1766,7 +1766,7 @@ pub struct DeString {
 ///
 /// # Examples
 /// ```
-/// # use shared::devec::DeString;
+/// # use spaghetto::DeString;
 /// let mut destring = DeString::new();
 /// destring.push_str_back("hello");
 /// destring.push_str_front("world ");
@@ -1776,7 +1776,7 @@ impl DeString {
     /// Creates a new empty DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::new();
     /// assert_eq!(destring.as_str(), "");
     /// ```
@@ -1789,7 +1789,7 @@ impl DeString {
     /// Creates a new DeString with at least the specified capacity.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::with_capacity(10);
     /// assert!(destring.capacity() >= 10);
     /// ```
@@ -1802,7 +1802,7 @@ impl DeString {
     /// Appends a character to the end of the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("he");
     /// destring.push_char_back('l');
     /// destring.push_char_back('l');
@@ -1821,7 +1821,7 @@ impl DeString {
     /// Appends a character to the front of the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("ello");
     /// destring.push_char_front('h');
     /// assert_eq!(destring.as_str(), "hello");
@@ -1838,7 +1838,7 @@ impl DeString {
     /// Removes the last character from the DeString and returns it, if it exists.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello");
     /// assert_eq!(destring.pop_back(), Some('o'));
     /// assert_eq!(destring.pop_back(), Some('l'));
@@ -1862,7 +1862,7 @@ impl DeString {
     /// Removes the first character from the DeString and returns it, if it exists.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello");
     /// assert_eq!(destring.pop_front(), Some('h'));
     /// assert_eq!(destring.pop_front(), Some('e'));
@@ -1886,7 +1886,7 @@ impl DeString {
     /// Appends the contents of a string to the end of the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello");
     /// destring.push_str_back(" world");
     /// assert_eq!(destring.as_str(), "hello world");
@@ -1907,7 +1907,7 @@ impl DeString {
     /// Prepends the contents of a string to the front of the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("world");
     /// destring.push_str_front("hello ");
     /// assert_eq!(destring.as_str(), "hello world");
@@ -1928,7 +1928,7 @@ impl DeString {
     /// Returns the number of bytes in the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.len(), 5);
     /// ```
@@ -1939,7 +1939,7 @@ impl DeString {
     /// Returns the number of bytes that can be stored in the DeString without reallocating (assuming perfect pushing to both sides).
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::with_capacity(10);
     /// assert!(destring.capacity() >= 10);
     /// ```
@@ -1950,12 +1950,12 @@ impl DeString {
     /// Returns true if the DeString is empty.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::new();
     /// assert!(destring.is_empty());
     /// ```
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert!(!destring.is_empty());
     /// ```
@@ -1966,7 +1966,7 @@ impl DeString {
     /// Removes all bytes from the DeString.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello");
     /// destring.clear();
     /// assert!(destring.is_empty());
@@ -1978,7 +1978,7 @@ impl DeString {
     /// Returns a reference to the string slice that the DeString manages.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.as_str(), "hello");
     /// ```
@@ -1989,7 +1989,7 @@ impl DeString {
     /// Returns a mutable reference to the string slice that the DeString manages.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hellO");
     /// let destr = destring.as_mut_str();
     /// destr.make_ascii_lowercase();
@@ -2002,7 +2002,7 @@ impl DeString {
     /// Returns a reference to the underlying `DeVec<u8>` buffer.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let destring = DeString::from("hello");
     /// assert_eq!(destring.as_bytes(), b"hello");
     /// ```
@@ -2019,7 +2019,7 @@ impl DeString {
     ///
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello");
     /// let devec = unsafe { destring.as_mut_devec() };
     /// devec.push_back(b' ');
@@ -2037,7 +2037,7 @@ impl DeString {
     /// Mutates the DeString by removing leading whitespace. The double-ended nature of the data structure means this can be done in-place.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("  hello");
     /// let original_ptr = destring.as_ptr();
     /// destring.mut_trim_front();
@@ -2055,7 +2055,7 @@ impl DeString {
     /// Mutates the DeString by removing trailing whitespace.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello  ");
     /// let original_ptr = destring.as_ptr();
     /// destring.mut_trim_back();
@@ -2074,7 +2074,7 @@ impl DeString {
     /// The double-ended nature of the data structure means this can be done in-place.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("  hello  ");
     /// let original_ptr = destring.as_ptr();
     /// destring.mut_trim();
@@ -2090,13 +2090,13 @@ impl DeString {
     /// Parses the DeString as a UTF-8 string. This returns Err if the DeVec input is not a valid UTF-8 string.
     /// # Examples
     /// ```
-    /// # use shared::devec::{DeVec, DeString};
+    /// # use spaghetto::{DeVec, DeString};
     /// let devec = DeVec::from(vec![104, 101, 108, 108, 111]);
     /// let destring = DeString::from_utf8(devec);
     /// assert_eq!(destring.unwrap().as_str(), "hello");
     /// ```
     /// ```should_panic
-    /// # use shared::devec::{DeVec, DeString};
+    /// # use spaghetto::{DeVec, DeString};
     /// let devec = DeVec::from(vec![104, 101, 108, 108, 111, 255]);
     /// let destring = DeString::from_utf8(devec);
     /// destring.expect("this should panic");
@@ -2111,7 +2111,7 @@ impl DeString {
     /// The caller is responsible for ensuring that the DeVec input is a valid UTF-8 string.
     /// # Examples
     /// ```
-    /// # use shared::devec::{DeVec, DeString};
+    /// # use spaghetto::{DeVec, DeString};
     /// let devec = DeVec::from(vec![104, 101, 108, 108, 111]);
     /// let destring = unsafe { DeString::from_utf8_unchecked(devec) };
     /// assert_eq!(destring.as_str(), "hello");
@@ -2123,7 +2123,7 @@ impl DeString {
     /// Removes a range of bytes from the DeString and returns an iterator over the chars in the removed region.
     /// # Examples
     /// ```
-    /// # use shared::devec::DeString;
+    /// # use spaghetto::DeString;
     /// let mut destring = DeString::from("hello world");
     /// let mut drain = destring.drain(6..);
     /// let drained_values = drain.collect::<String>();
@@ -2167,6 +2167,18 @@ impl Default for DeString {
 impl Debug for DeString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Debug::fmt(self.as_str(), f)
+    }
+}
+
+impl std::fmt::Write for DeString {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        self.push_str_back(s);
+        Ok(())
+    }
+
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        self.push_char_back(c);
+        Ok(())
     }
 }
 
