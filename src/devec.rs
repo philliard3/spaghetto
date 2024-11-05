@@ -5,9 +5,9 @@
 
 use crate::{BackToFront, DropBehavior, FrontToBack, Middle, RebalanceBehavior, RebalanceStrategy};
 use std::alloc::Layout;
-use std::ptr::NonNull;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 
 /// A double-ended vector that allows for efficient insertion and removal at both ends.
 /// The DeVec is backed by a buffer that is dynamically resized as needed.
@@ -348,7 +348,7 @@ where
     Rebalance: RebalanceBehavior,
 {
     // Grows the vector by doubling the capacity.
-    // Currently it also shifts elements slightly to the side that was lopsided. In the event of a tie it chooses the start of the buffer.    
+    // Currently it also shifts elements slightly to the side that was lopsided. In the event of a tie it chooses the start of the buffer.
     #[inline]
     pub(crate) fn grow(&mut self) {
         // since we set the capacity to usize::MAX when T has size 0,
@@ -380,37 +380,38 @@ where
             let nc = new_cap as f32;
             let len = self.len as f32;
 
-            let new_start: usize = match <Rebalance as crate::settings::seal_rebalance_behavior::Sealed>::BEHAVIOR {
-                RebalanceStrategy::StartAtFront => 0,
-                RebalanceStrategy::Middle => {
-                    let midpoint = new_cap / 2;
-                    midpoint - (self.len / 2)
-                }
-                RebalanceStrategy::FavorCrowdedSide => {
-                    // find out which side has no room, favoring the back side if it's a tie
-                    let back_space = self.space_back();
-                    if back_space == 0 {
-                        let new_offset = 0.2 * nc;
-                        // now there's much more room at the back, and a little more at the front
-                        new_offset as usize
-                    } else {
-                        let new_end = 0.8 * nc;
-                        let new_start = new_end - len;
-                        new_start as usize
+            let new_start: usize =
+                match <Rebalance as crate::settings::seal_rebalance_behavior::Sealed>::BEHAVIOR {
+                    RebalanceStrategy::StartAtFront => 0,
+                    RebalanceStrategy::Middle => {
+                        let midpoint = new_cap / 2;
+                        midpoint - (self.len / 2)
                     }
-                }
-                RebalanceStrategy::OnlyChangeCrowdedSide => {
-                    // find out which side has no room, favoring the back side if it's a tie
-                    let back_space = self.space_back();
-                    if back_space == 0 {
-                        // we know there's no room at the back, so we keep the starting offset the same
-                        self.start
-                    } else {
-                        // back space is kept the same, so front space is increased by the difference between that and the new len and capacity
-                        new_cap - (self.len + back_space)
+                    RebalanceStrategy::FavorCrowdedSide => {
+                        // find out which side has no room, favoring the back side if it's a tie
+                        let back_space = self.space_back();
+                        if back_space == 0 {
+                            let new_offset = 0.2 * nc;
+                            // now there's much more room at the back, and a little more at the front
+                            new_offset as usize
+                        } else {
+                            let new_end = 0.8 * nc;
+                            let new_start = new_end - len;
+                            new_start as usize
+                        }
                     }
-                }
-            };
+                    RebalanceStrategy::OnlyChangeCrowdedSide => {
+                        // find out which side has no room, favoring the back side if it's a tie
+                        let back_space = self.space_back();
+                        if back_space == 0 {
+                            // we know there's no room at the back, so we keep the starting offset the same
+                            self.start
+                        } else {
+                            // back space is kept the same, so front space is increased by the difference between that and the new len and capacity
+                            new_cap - (self.len + back_space)
+                        }
+                    }
+                };
 
             /*
             // push from the left
@@ -567,9 +568,7 @@ where
                 }
             }
 
-            unsafe {
-                Some(std::ptr::read(self.ptr.as_ptr().add(self.start + self.len)))
-            }
+            unsafe { Some(std::ptr::read(self.ptr.as_ptr().add(self.start + self.len))) }
         }
     }
 
@@ -616,14 +615,14 @@ where
     /// assert_eq!(vec.len(), 1);
     /// ```
     #[inline]
-     pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.len
     }
 
     /// Returns the total capacity of the `DeVec`. This is less than or equal to the number of elements that it can hold.
     /// A DeVec tends to re-allocate with space on either side, so there is less room on either side than in a [`Vec`] with the same capacity.
     #[inline]
-     pub fn capacity(&self) -> usize {
+    pub fn capacity(&self) -> usize {
         self.cap
     }
 
@@ -986,7 +985,7 @@ where
         // this can never panic because otherwise index would be equal to len
         self.pop_back().unwrap()
     }
-    
+
     /// Swaps the specified element with the first or last one, depending on which one is closer to the end of the buffer.
     /// for a simpler version that always swaps with the back like [`Vec::swap_remove`](Vec::swap_remove), use [`swap_remove`](DeVec::swap_remove).
     /// # Panics
@@ -1034,7 +1033,10 @@ where
 
     /// Internal method for draining a range of elements from the `DeVec`.
     #[inline]
-    pub(crate) fn drain_inner(&mut self, range: std::ops::Range<usize>) -> Drain<'_, T, DropOrder, Rebalance> {
+    pub(crate) fn drain_inner(
+        &mut self,
+        range: std::ops::Range<usize>,
+    ) -> Drain<'_, T, DropOrder, Rebalance> {
         let start = range.start;
         let end = range.end;
         assert!(start <= end, "start must be less than or equal to end");
@@ -1193,7 +1195,7 @@ where
         self.reserve_back(other.len());
         unsafe {
             // SAFETY: the DeVec has reserved enough space for the slice.
-            // SAFETY: We have a &mut to the DeVec, so we know that `other` is not aliasing the inside of this DeVec. 
+            // SAFETY: We have a &mut to the DeVec, so we know that `other` is not aliasing the inside of this DeVec.
             std::ptr::copy_nonoverlapping(
                 other.as_ptr(),
                 self.ptr.as_ptr().add(self.start + self.len),
@@ -1324,7 +1326,6 @@ where
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
-
     #[inline]
     fn default() -> Self {
         let cap = if std::mem::size_of::<T>() == 0 {
@@ -1496,7 +1497,6 @@ where
         new
     }
 }
-
 
 impl<T, DropOrder, Rebalance> Deref for DeVec<T, DropOrder, Rebalance>
 where
@@ -2098,4 +2098,3 @@ mod devec_tests {
         assert_eq!(&*devec, &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 }
-

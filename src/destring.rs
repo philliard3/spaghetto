@@ -724,7 +724,7 @@ impl std::hash::Hash for DeString {
         self.as_str().hash(state);
     }
 }
-pub use destring_drain::Drain as Drain;
+pub use destring_drain::Drain;
 pub(crate) mod destring_drain {
     /// An iterator over the chars in a [`DeString`](super::DeString) that removes them from the `DeString`.
     /// This can be obtained from the [`DeString::drain`](super::DeString::drain) method.
@@ -764,7 +764,6 @@ pub(crate) mod destring_drain {
     }
 
     impl std::iter::FusedIterator for Drain<'_> {}
-    
 }
 
 #[cfg(test)]
