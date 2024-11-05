@@ -26,7 +26,7 @@ use std::ptr::NonNull;
 ///
 /// # Drop Order
 /// The default drop order is front-to-back, meaning that elements are dropped in the same order as iteration would happen.
-/// This can be changed to back-to-front by using the `BackToFront` drop order.
+/// This can be changed to back-to-front by using the [`BackToFront`] drop order.
 ///
 /// # Rebalance Behavior
 /// The default rebalance behavior ([`Middle`])  is to center the data so that the middle of the slice is at the middle of the buffer after the buffer grows.
@@ -102,7 +102,7 @@ where
 impl<T> DeVec<T, FrontToBack> {
     /// Creates a new, empty `DeVec`. The default is to drop items from front to back.
     /// A double ended queue does not necessarily preserve insertion order, so the drop order might matter for some use cases.
-    /// If you need to drop items from back to front, use `DeVec::new_with_drop_order::<BackToFront>()`.
+    /// If you need to drop items from back to front, use [`DeVec::new_with_drop_order::<BackToFront>()`](DeVec::new_with_drop_order).
     ///
     /// # Examples
     /// ```
@@ -229,9 +229,9 @@ where
 
     /// Creates a new, empty `DeVec` with a specified capacity.
     /// The DeVec will be able to hold at least `cap` elements without reallocating.
-    /// If `T` is a zero-sized type, the capacity is set to `usize::MAX`.
+    /// If `T` is a zero-sized type, the capacity is set to [`usize::MAX`].
     /// # Panics
-    /// Panics if the allocation size exceeds isize::MAX
+    /// Panics if the allocation size exceeds [`isize::MAX`]
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
@@ -351,7 +351,7 @@ where
     // Currently it also shifts elements slightly to the side that was lopsided. In the event of a tie it chooses the start of the buffer.
     #[inline]
     pub(crate) fn grow(&mut self) {
-        // since we set the capacity to usize::MAX when T has size 0,
+        // since we set the capacity to `usize::MAX` when T has size 0,
         // getting to here necessarily means the Vec is overfull.
         assert!(std::mem::size_of::<T>() != 0, "capacity overflow");
 
@@ -814,7 +814,7 @@ where
     /// After calling `reserve_back`, capacity will be greater than or equal to `self.len() + additional`.
     ///
     /// # Panics
-    /// Panics if the allocation size exceeds isize::MAX
+    /// Panics if the allocation size exceeds [`isize::MAX`]
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
@@ -838,7 +838,7 @@ where
     /// After calling `reserve_front`, capacity will be greater than or equal to `self.len() + additional`.
     /// Returns the new capacity.
     /// # Panics
-    /// Panics if the allocation size exceeds isize::MAX
+    /// Panics if the allocation size exceeds [`isize::MAX`]
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
@@ -1177,7 +1177,7 @@ where
 
     /// Copies all elements from a slice into the `DeVec`.
     /// # Panics
-    /// Panics if the allocation size exceeds `isize::MAX``
+    /// Panics if the allocation size exceeds [`isize::MAX`]
     /// Other failure happens if an allocation error occurs.
     ///
     /// # Examples
@@ -1208,7 +1208,7 @@ where
     /// Extends the `DeVec` with the elements from the slice.
     /// The elements must be cloned to be inserted into the `DeVec`.
     /// # Panics
-    /// Panics if the allocation size exceeds isize::MAX
+    /// Panics if the allocation size exceeds [`isize::MAX`]
     /// Other failure happens if an allocation error occurs.
     /// # Examples
     /// ```
@@ -1604,7 +1604,7 @@ where
     }
 }
 
-/// A draining iterator over the elements of a `DeVec`.
+/// A draining iterator over the elements of a [`DeVec`].
 /// This struct is created by the [`drain`](DeVec::drain) method on [`DeVec`].
 pub struct Drain<'a, T, DropOrder, Rebalance>
 where
@@ -1933,17 +1933,18 @@ where
     }
 }
 
-// vec macro but for DeVec
+/// A version of the [`vec!`] macro but for [`DeVec`]. This macro helps you create a [`DeVec`] from a list of elements.
+/// It will use the default drop order of [`FrontToBack`](crate::settings::FrontToBack) and rebalance strategy of putting the center of the elements into the [`Middle`](crate::settings::Middle) of the allocation after a resize.
 #[macro_export]
 macro_rules! devec {
     () => {
-        $crate::devec::DeVec::new()
+        $crate::devec::DeVec::<_>::new()
     };
     ($elem:expr; $n:expr) => {
-        $crate::devec::DeVec::from(std::iter::repeat($elem).take($n))
+        $crate::devec::DeVec::<_>::from(std::iter::repeat($elem).take($n))
     };
     ($($x:expr),+ $(,)?) => {
-        $crate::devec::DeVec::from(vec![$($x),+])
+        $crate::devec::DeVec::<_>::from(vec![$($x),+])
     };
 }
 

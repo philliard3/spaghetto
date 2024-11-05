@@ -1,8 +1,7 @@
-use super::DeVec;
+//! A module to hold [`DeString`], a string type that uses a [`DeVec`] internally.
+//! 
 
-pub struct DeString {
-    devec: DeVec<u8>,
-}
+use super::DeVec;
 
 /// A string type that uses a [`DeVec`] internally.
 /// This type is similar to [`String`] but uses a [`DeVec<u8>`] internally instead of a [`Vec<u8>`].
@@ -16,6 +15,10 @@ pub struct DeString {
 /// destring.push_str_front("world ");
 /// assert_eq!(destring.as_str(), "world hello");
 /// ```
+pub struct DeString {
+    devec: DeVec<u8>,
+}
+
 impl DeString {
     /// Creates a new empty `DeString`.
     /// # Examples
