@@ -1,5 +1,5 @@
 //! A module to hold [`DeString`], a string type that uses a [`DeVec`] internally.
-//! 
+//!
 
 use super::DeVec;
 
