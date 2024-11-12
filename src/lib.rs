@@ -45,8 +45,8 @@ pub use settings::*;
 pub mod devec;
 pub use devec::DeVec;
 
-// #[cfg(test)]
-// mod property_tests;
+#[cfg(test)]
+mod property_tests;
 
 // a silly little guy
 /// The default config for a [`DeVec<T>`], named after a single piece of spaghetti.
