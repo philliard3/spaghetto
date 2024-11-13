@@ -1,6 +1,5 @@
 use proptest_derive::Arbitrary;
 
-
 use super::*;
 use proptest::prelude::*;
 
@@ -13,7 +12,7 @@ enum DequeOps<T> {
     PopBack,
 }
 
-proptest!{
+proptest! {
     // Test that no combination of pushes and pops of i32 will cause the devec to panic
     #[test]
     fn test_push_pop(ref ops in proptest::collection::vec(any::<DequeOps<i32>>(), 0..100)) {
