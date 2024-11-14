@@ -1596,6 +1596,26 @@ pub(crate) mod serde_impls {
             Ok(DeVec::from(vec).with_drop_order().with_rebalance_behavior())
         }
     }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use serde_json;
+        #[test]
+        fn test_serde() {
+            let input_sequences = [
+                vec![0, 1, 2, 3, 4, 5, 6],
+                vec![3, 2, 1],
+                vec![],
+            ];
+            for sequence in input_sequences.iter() {
+                let devec = DeVec::from(sequence.clone());
+                let serialized = serde_json::to_string(&devec).unwrap();
+                let deserialized: DeVec<i32> = serde_json::from_str(&serialized).unwrap();
+                assert_eq!(devec, deserialized);
+            }
+        }
+    }
 }
 /// A draining iterator over the elements of a [`DeVec`].
 /// This struct is created by the [`drain`](DeVec::drain) method on [`DeVec`].
@@ -2092,12 +2112,13 @@ mod devec_tests {
         assert_eq!(&*extracted, &[6, 7, 8, 9]);
         assert_eq!(&*devec, &[0, 1, 2, 3, 4, 5]);
 
+        let empty_i32_slice: &[i32] = &[];
         let mut devec: DeVec<_> = DeVec::from_iter(0..10);
         let keep_everything_before = 42;
         let extracted: Vec<i32> = devec
             .extract_if(|i, _| i >= keep_everything_before)
             .collect();
-        assert_eq!(&*extracted, &[]);
+        assert_eq!(&*extracted, empty_i32_slice);
         assert_eq!(&*devec, &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
         let mut devec: DeVec<_> = DeVec::from_iter(0..10);
@@ -2106,6 +2127,6 @@ mod devec_tests {
             .extract_if(|i, _| i >= keep_everything_before)
             .collect();
         assert_eq!(&*extracted, &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-        assert_eq!(&*devec, &[]);
+        assert_eq!(&*devec, empty_i32_slice);
     }
 }
