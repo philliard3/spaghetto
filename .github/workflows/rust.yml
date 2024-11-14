@@ -18,9 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download nightly rust
-      run:
-        rustup toolchain install nightly
-        rustup +nightly component add miri
+      run: rustup toolchain install nightly
+    - name: Download miri
+      run: rustup +nightly component add miri
     - name: Build
       run: cargo build --verbose
     - name: Run tests
