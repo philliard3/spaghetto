@@ -359,10 +359,7 @@ where
         assert!(std::mem::size_of::<T>() != 0, "capacity overflow");
 
         let (new_cap, new_start, new_layout) = if self.cap == 0 {
-            // TODO: adjust this to use a starting size of 3 (or any odd number larger than 1) to allow for growth
-            //    perhaps 5 or 7 would be analogous to std::Vec's starting size of 4
             let starting_cap = 5;
-            // let starting_cap = 1;
             let midpoint = starting_cap / 2;
             (
                 starting_cap,
