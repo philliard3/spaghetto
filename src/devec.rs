@@ -9,9 +9,6 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
 /// A double-ended vector that allows for efficient insertion and removal at both ends.
 /// The DeVec is backed by a buffer that is dynamically resized as needed.
 /// Capacity is doubled on attempts to push at either edge of the buffer.
@@ -1570,32 +1567,36 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<T, DropOrder, Rebalance> Serialize for DeVec<T, DropOrder, Rebalance>
-where
-    T: Serialize,
-    DropOrder: DropBehavior,
-    Rebalance: RebalanceBehavior,
-{
-    #[inline]
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.as_slice().serialize(serializer)
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[doc(hidden)]
+pub(crate) mod serde_impls {
+    use super::*;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    impl<T, DropOrder, Rebalance> Serialize for DeVec<T, DropOrder, Rebalance>
+    where
+        T: Serialize,
+        DropOrder: DropBehavior,
+        Rebalance: RebalanceBehavior,
+    {
+        #[inline]
+        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            self.as_slice().serialize(serializer)
+        }
+    }
+
+    impl<'src, T, DropOrder, Rebalance> Deserialize<'src> for DeVec<T, DropOrder, Rebalance>
+    where
+        T: Deserialize<'src>,
+        DropOrder: DropBehavior,
+        Rebalance: RebalanceBehavior,
+    {
+        #[inline]
+        fn deserialize<D: Deserializer<'src>>(deserializer: D) -> Result<Self, D::Error> {
+            let vec = <Vec<T> as Deserialize<'src>>::deserialize(deserializer)?;
+            Ok(DeVec::from(vec).with_drop_order().with_rebalance_behavior())
+        }
     }
 }
-
-#[cfg(feature = "serde")]
-impl<'src, T, DropOrder, Rebalance> Deserialize<'src> for DeVec<T, DropOrder, Rebalance>
-where
-    T: Deserialize<'src>,
-    DropOrder: DropBehavior,
-    Rebalance: RebalanceBehavior,
-{
-    #[inline]
-    fn deserialize<D: Deserializer<'src>>(deserializer: D) -> Result<Self, D::Error> {
-        let vec = <Vec<T> as Deserialize<'src>>::deserialize(deserializer)?;
-        Ok(DeVec::from(vec).with_drop_order().with_rebalance_behavior())
-    }
-}
-
 /// A draining iterator over the elements of a [`DeVec`].
 /// This struct is created by the [`drain`](DeVec::drain) method on [`DeVec`].
 pub struct Drain<'a, T, DropOrder, Rebalance>

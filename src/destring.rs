@@ -16,7 +16,7 @@ use super::DeVec;
 /// assert_eq!(destring.as_str(), "world hello");
 /// ```
 pub struct DeString {
-    devec: DeVec<u8>,
+    devec: DeVec<u8, crate::FrontToBack, crate::Middle>,
 }
 
 impl DeString {
@@ -767,6 +767,33 @@ pub(crate) mod destring_drain {
     }
 
     impl std::iter::FusedIterator for Drain<'_> {}
+}
+
+
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[doc(hidden)]
+pub(crate) mod serde_impls{
+    use super::*;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    impl Serialize for DeString {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            self.as_str().serialize(serializer)
+        }
+    }
+
+    impl<'de> Deserialize<'de> for DeString {
+        fn deserialize<D>(deserializer: D) -> Result<DeString, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let s = String::deserialize(deserializer)?;
+            Ok(DeString::from(s))
+        }
+    }
 }
 
 #[cfg(test)]
