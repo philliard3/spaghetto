@@ -254,7 +254,6 @@ where
     #[inline]
     #[must_use]
     pub fn with_capacity(cap: usize) -> Self {
-        // assert!(std::mem::size_of::<T>() != 0, "We're not ready to handle ZSTs");
         let (cap, ptr) = if std::mem::size_of::<T>() == 0 {
             (usize::MAX, NonNull::dangling())
         } else {
@@ -1473,19 +1472,10 @@ where
     #[inline]
     fn clone(&self) -> Self {
         let mut new: DeVec<T, DropOrder, Rebalance> = DeVec::with_capacity(self.cap);
-        new.len = self.len;
-        // TODO: properly center the new DeVec
-        // new.start = (new.cap/2) - (new.len/2);
-        // except then we would need to shift the elements? seems complicated
-
-        new.start = self.start;
-        unsafe {
-            std::ptr::copy(
-                self.ptr.as_ptr().add(self.start),
-                new.ptr.as_ptr().add(new.start),
-                self.len,
-            );
-        };
+        new.start = (new.cap/2).saturating_sub(new.len/2);
+        for elem in self {
+            new.push_back(elem.clone());
+        }
         new
     }
 }
