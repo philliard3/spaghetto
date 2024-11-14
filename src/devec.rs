@@ -9,6 +9,9 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
 /// A double-ended vector that allows for efficient insertion and removal at both ends.
 /// The DeVec is backed by a buffer that is dynamically resized as needed.
 /// Capacity is doubled on attempts to push at either edge of the buffer.
@@ -1578,28 +1581,28 @@ where
 }
 
 #[cfg(feature = "serde")]
-impl<T, DropOrder, Rebalance> serde::Serialize for DeVec<T, DropOrder, Rebalance>
+impl<T, DropOrder, Rebalance> Serialize for DeVec<T, DropOrder, Rebalance>
 where
-    T: serde::Serialize,
+    T: Serialize,
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
     #[inline]
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.as_slice().serialize(serializer)
     }
 }
 
 #[cfg(feature = "serde")]
-impl<'src, T, DropOrder, Rebalance> serde::Deserialize<'src> for DeVec<T, DropOrder, Rebalance>
+impl<'src, T, DropOrder, Rebalance> Deserialize<'src> for DeVec<T, DropOrder, Rebalance>
 where
-    T: serde::Deserialize<'src>,
+    T: Deserialize<'src>,
     DropOrder: DropBehavior,
     Rebalance: RebalanceBehavior,
 {
     #[inline]
-    fn deserialize<D: serde::Deserializer<'src>>(deserializer: D) -> Result<Self, D::Error> {
-        let vec = Vec::<T>::deserialize(deserializer)?;
+    fn deserialize<D: Deserializer<'src>>(deserializer: D) -> Result<Self, D::Error> {
+        let vec = <Vec<T> as Deserialize<'src>>::deserialize(deserializer)?;
         Ok(DeVec::from(vec).with_drop_order().with_rebalance_behavior())
     }
 }
@@ -2079,23 +2082,31 @@ mod devec_tests {
         let mut devec: DeVec<_> = DeVec::from_iter(0..10);
         let index_range = 0..3;
         let extracted: Vec<i32> = devec.extract_if(|i, _| index_range.contains(&i)).collect();
-        assert_eq!(extracted, vec![0, 1, 2]);
+        assert_eq!(&*extracted, &[0, 1, 2]);
         assert_eq!(&*devec, &[3, 4, 5, 6, 7, 8, 9]);
 
         let mut devec: DeVec<_> = DeVec::from_iter(0..10);
         let keep_everything_before = 6;
         let extracted: Vec<i32> = devec
-            .extract_if(|i, _| i > keep_everything_before)
+            .extract_if(|i, _| i >= keep_everything_before)
             .collect();
-        assert_eq!(extracted, vec![6, 7, 8, 9]);
+        assert_eq!(&*extracted, &[6, 7, 8, 9]);
         assert_eq!(&*devec, &[0, 1, 2, 3, 4, 5]);
 
         let mut devec: DeVec<_> = DeVec::from_iter(0..10);
         let keep_everything_before = 42;
         let extracted: Vec<i32> = devec
-            .extract_if(|i, _| i > keep_everything_before)
+            .extract_if(|i, _| i >= keep_everything_before)
             .collect();
-        assert_eq!(extracted, vec![]);
+        assert_eq!(&*extracted, &[]);
         assert_eq!(&*devec, &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+        let mut devec: DeVec<_> = DeVec::from_iter(0..10);
+        let keep_everything_before = 0;
+        let extracted: Vec<i32> = devec
+            .extract_if(|i, _| i >= keep_everything_before)
+            .collect();
+        assert_eq!(&*extracted, &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(&*devec, &[]);
     }
 }
