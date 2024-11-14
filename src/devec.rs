@@ -869,7 +869,6 @@ where
     /// devec.push_back(2);
     /// devec.insert(3, 3);
     /// ```
-    // TODO: tests for insert
     #[inline]
     pub fn insert(&mut self, index: usize, elem: T) {
         assert!(index <= self.len, "index out of bounds");
