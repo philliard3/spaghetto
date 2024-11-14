@@ -1473,9 +1473,19 @@ where
     fn clone(&self) -> Self {
         let mut new: DeVec<T, DropOrder, Rebalance> = DeVec::with_capacity(self.cap);
         new.start = (new.cap/2).saturating_sub(new.len/2);
-        for elem in self {
-            new.push_back(elem.clone());
+        new.len = 0;
+        for (i, elem) in self.iter().enumerate() {
+            let elem = elem.clone();
+            unsafe  {
+                new.ptr.as_ptr().add(new.start + i).write(elem);
+            }
         }
+        // We can't trust that elem.clone() won't panic, so we need a strategy for it.
+        // Currently, everything is leaked.
+        // If we wanted to be able to drop all elements in the event of a panic,
+        // we would need to slowly increment new.len after each write
+        // so that we have the right len when Drop is run in unwind.
+        new.len = self.len;
         new
     }
 }
