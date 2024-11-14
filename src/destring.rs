@@ -769,11 +769,10 @@ pub(crate) mod destring_drain {
     impl std::iter::FusedIterator for Drain<'_> {}
 }
 
-
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[doc(hidden)]
-pub(crate) mod serde_impls{
+pub(crate) mod serde_impls {
     use super::*;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
     impl Serialize for DeString {

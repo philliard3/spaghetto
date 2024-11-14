@@ -22,7 +22,7 @@
 //! for i in 0..3 {
 //!    devec.push_back(i);
 //! }
-//! 
+//!
 //! // we can get a single contiguous slice of the entire DeVec without having to shift elements.
 //! let no_mutation = &devec;
 //! let slice = no_mutation.as_slice();

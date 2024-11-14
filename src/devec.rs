@@ -1469,11 +1469,11 @@ where
     #[inline]
     fn clone(&self) -> Self {
         let mut new: DeVec<T, DropOrder, Rebalance> = DeVec::with_capacity(self.cap);
-        new.start = (new.cap/2).saturating_sub(new.len/2);
+        new.start = (new.cap / 2).saturating_sub(new.len / 2);
         new.len = 0;
         for (i, elem) in self.iter().enumerate() {
             let elem = elem.clone();
-            unsafe  {
+            unsafe {
                 new.ptr.as_ptr().add(new.start + i).write(elem);
             }
         }
@@ -1603,11 +1603,7 @@ pub(crate) mod serde_impls {
         use serde_json;
         #[test]
         fn test_serde() {
-            let input_sequences = [
-                vec![0, 1, 2, 3, 4, 5, 6],
-                vec![3, 2, 1],
-                vec![],
-            ];
+            let input_sequences = [vec![0, 1, 2, 3, 4, 5, 6], vec![3, 2, 1], vec![]];
             for sequence in input_sequences.iter() {
                 let devec = DeVec::from(sequence.clone());
                 let serialized = serde_json::to_string(&devec).unwrap();
