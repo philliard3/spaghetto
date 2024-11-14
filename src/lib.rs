@@ -1,5 +1,5 @@
 //! **spaghetto** is a library for creating double-ended data structures that can be rolled out or eaten on from either side.
-//! This includes the base structure [`DeVec`], a double-ended vector that can be used as a deque, and [`DeString`], a double-ended alternative to [`String`].
+//! This includes the base structure [`DeVec`], a double-ended [`Vec`] that can be used as a deque, and [`DeString`], a double-ended alternative to [`String`].
 //!
 //! <br>
 //!
