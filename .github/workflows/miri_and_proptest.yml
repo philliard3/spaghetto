@@ -1,4 +1,4 @@
-name: Rust
+name: Build + Miri Tests + Property Tests
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Run tests
-      run:
+      run: |
         cargo +nightly miri test devec --all-features --verbose
         cargo +nightly miri test destring --all-features --verbose
         cargo test property_tests --verbose
