@@ -440,10 +440,6 @@ where
 
             (new_cap, new_start, new_layout)
         };
-        // println!(
-        //     "Growing from {} to {} with new start at {} and length of {}",
-        //     self.cap, new_cap, new_start, self.len
-        // );
 
         // Ensure that the new allocation doesn't exceed `isize::MAX` bytes.
         assert!(
@@ -532,9 +528,6 @@ where
         unsafe {
             // "semantically, [the element] is moved" to the new pointer location
             if self.cap == 1 {
-                // println!(
-                //     "cap is 1 so we're writing to the start of the allocation",
-                // );
                 std::ptr::write(self.ptr.as_ptr(), elem);
             } else {
                 // it should be impossible for self.start to be 0 so subtracting 1 is fine
@@ -1706,23 +1699,32 @@ where
                     .add(self.devec.start + current_index)
             };
             let mut result = unsafe { std::ptr::read(current_ptr) };
-            println!(
-                "starting iteration with current index {current_index} and buffer write start {}",
-                self.buffer_write_start
-            );
+            #[cfg(test)]
+            {
+                println!(
+                    "starting iteration with current index {current_index} and buffer write start {}",
+                    self.buffer_write_start
+                );
+            }
 
             let should_extract = (self.f)(current_index, &mut result);
             if should_extract {
-                println!("extracting");
+                #[cfg(test)]
+                {
+                    println!("extracting");
+                }
                 self.current_index += 1;
                 self.items_removed += 1;
                 return Some(result);
             } else {
+                #[cfg(test)]
+                {
+                    println!(
+                        "moving element {} to position {}",
+                        self.current_index, self.buffer_write_start
+                    );
+                }
                 // copy the element to the front of the buffer
-                println!(
-                    "moving element {} to position {}",
-                    self.current_index, self.buffer_write_start
-                );
                 let front_of_buffer_ptr = unsafe {
                     self.devec
                         .ptr
