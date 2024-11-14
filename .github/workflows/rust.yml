@@ -2,9 +2,10 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "release/*" ]
+  workflow_dispatch:
+  # pull_request:
+    # branches: [ "main" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -16,6 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Download nightly rust
+      run: rustup toolchain install nightly
     - name: Build
       run: cargo build --verbose
     - name: Run tests
