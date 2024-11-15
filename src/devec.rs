@@ -1299,7 +1299,7 @@ where
                 self.len,
             );
         }
-        self.start = new_start;
+        self.start = index;
     }
 
     /// Returns a mutable reference to the DeVec's managed slice. The DeVec is consumed and forgotten, meaning its Drop will never run.

@@ -205,6 +205,18 @@ impl DeString {
         self.devec.capacity()
     }
 
+    /// Returns the number of bytes in the `DeString` that can be pushed to the front without reallocating. See [`DeVec::space_front`](crate::DeVec::space_front).
+    #[inline]
+    pub fn space_front(&self) -> usize {
+        self.devec.space_front()
+    }
+
+    /// Returns the number of bytes in the `DeString` that can be pushed to the back without reallocating. See [`DeVec::space_back`](crate::DeVec::space_back).
+    #[inline]
+    pub fn space_back(&self) -> usize {
+        self.devec.space_back()
+    }
+
     /// Returns true if the `DeString` is empty.
     /// # Examples
     /// ```
@@ -235,6 +247,18 @@ impl DeString {
         self.devec.clear();
     }
 
+    /// Rebalances the `DeString`'s buffer to the middle of its allocation. See [`DeVec::rebalance`](crate::DeVec::rebalance).
+    #[inline]
+    pub fn rebalance(&mut self) {
+        self.devec.rebalance();
+    }
+
+    /// Rebalances the `DeString`'s buffer to the specified location in the buffer. See [`DeVec::rebalance_to`](crate::DeVec::rebalance_to).
+    #[inline]
+    pub fn rebalance_to(&mut self, new_cap: usize) {
+        self.devec.rebalance_to(new_cap);
+    }
+
     /// Returns a reference to the string slice that the `DeString` manages.
     /// # Examples
     /// ```
@@ -260,18 +284,6 @@ impl DeString {
     #[inline]
     pub fn as_mut_str(&mut self) -> &mut str {
         unsafe { std::str::from_utf8_unchecked_mut(&mut self.devec) }
-    }
-
-    /// Returns a reference to the underlying [`DeVec<u8>`] buffer.
-    /// # Examples
-    /// ```
-    /// # use spaghetto::DeString;
-    /// let destring = DeString::from("hello");
-    /// assert_eq!(destring.as_bytes(), b"hello");
-    /// ```
-    #[inline]
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.devec
     }
 
     /// Returns a mutable reference to the underlying [`DeVec<u8>`] buffer.
