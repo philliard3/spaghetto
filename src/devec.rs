@@ -1953,13 +1953,34 @@ where
 
 /// A version of the [`vec!`] macro but for [`DeVec`]. This macro helps you create a [`DeVec`] from a list of elements.
 /// It will use the default drop order of [`FrontToBack`](crate::settings::FrontToBack) and rebalance strategy of putting the center of the elements into the [`Middle`](crate::settings::Middle) of the allocation after a resize.
+/// # Examples
+/// ```
+/// # use spaghetto::devec;
+/// let devec = devec![1, 2, 3, 4, 5];
+/// assert_eq!(devec.len(), 5);
+/// assert_eq!(devec.capacity(), 5);
+/// assert_eq!(devec.as_slice(), &[1, 2, 3, 4, 5]);
+/// ```
+/// ```
+/// # use spaghetto::devec;
+/// let devec = devec![1; 5];
+/// assert_eq!(devec.len(), 5);
+/// assert_eq!(devec.capacity(), 5);
+/// assert_eq!(devec.as_slice(), &[1, 1, 1, 1, 1]);
+/// ```
+/// ```
+/// # use spaghetto::{DeVec, devec};
+/// let devec : DeVec<i32> = devec![];
+/// assert_eq!(devec.len(), 0);
+/// assert_eq!(devec.capacity(), 0);
+/// ```
 #[macro_export]
 macro_rules! devec {
     () => {
         $crate::devec::DeVec::<_>::new()
     };
     ($elem:expr; $n:expr) => {
-        $crate::devec::DeVec::<_>::from(std::iter::repeat($elem).take($n))
+        $crate::devec::DeVec::<_>::from_iter(std::iter::repeat($elem).take($n))
     };
     ($($x:expr),+ $(,)?) => {
         $crate::devec::DeVec::<_>::from(vec![$($x),+])
