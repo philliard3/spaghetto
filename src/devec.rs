@@ -1253,10 +1253,10 @@ where
 
     /// Shifts the elements of the DeVec to be centered to the location in the buffer specified by the index.
     /// This can address imbalances in the buffer that may have been caused by repeated pushes or removals on one side.
-    /// 
+    ///
     /// # Panics
     /// Panics if the index is larger than the length of the DeVec, or if the index would require writing out of bounds.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// # use spaghetto::DeVec;
@@ -1279,8 +1279,19 @@ where
         if self.start == index {
             return;
         }
-        assert!(index < self.cap, "attempt to rebalance DeVec of cap={}, with index {} is out of bounds", self.cap, index);
-        assert!((self.cap - index) >= self.len, "attempt to rebalance DeVec of len={}, cap={} with index {} would write out of bounds", self.len, self.cap, index);
+        assert!(
+            index < self.cap,
+            "attempt to rebalance DeVec of cap={}, with index {} is out of bounds",
+            self.cap,
+            index
+        );
+        assert!(
+            (self.cap - index) >= self.len,
+            "attempt to rebalance DeVec of len={}, cap={} with index {} would write out of bounds",
+            self.len,
+            self.cap,
+            index
+        );
         unsafe {
             std::ptr::copy(
                 self.ptr.as_ptr().add(self.start),

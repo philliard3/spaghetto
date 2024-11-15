@@ -28,7 +28,7 @@
 //! let no_mutation = &devec;
 //! let slice = no_mutation.as_slice();
 //! ```
-//! 
+//!
 //! ## DeString
 //! A [`DeString`] can be used as a double-ended string, and because of this, we can efficiently remove extra whitespace from either side, mutating in place and maintining a single contiguous string slice without the cost of shifting like with a String.
 //!
