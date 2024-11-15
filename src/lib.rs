@@ -1,5 +1,5 @@
 //! # spaghetto
-//! **spaghetto** is a library for creating double-ended data structures that can be rolled out or eaten on from either side.
+//! **spaghetto** is a library for creating double-ended data structures that can be rolled out or consumed from either side.
 //! This includes the base structure [`DeVec`], a double-ended [`Vec`] that can be used as a deque, and [`DeString`], a double-ended alternative to [`String`].
 //!
 //! <br>
@@ -8,7 +8,7 @@
 //! - A [`DeVec`] can be used as a double-ended queue, but with the added benefit of being able to get a single contiguous slice of the entire structure.
 //! ```
 //! use spaghetto::DeVec;
-//! let mut devec = DeVec::with_capacity(5);
+//! let mut devec : DeVec<i32> = DeVec::with_capacity(5);
 //! devec.push_back(1);
 //! devec.push_front(2);
 //! devec.push_back(3);

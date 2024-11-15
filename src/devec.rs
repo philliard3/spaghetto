@@ -138,7 +138,7 @@ impl<T> DeVec<T, FrontToBack> {
     /// devec.push_back(1);
     /// devec.push_back(2);
     /// let devec = devec.as_back_to_front();
-    /// assert_eq!(&*devec, &[2, 1]);
+    /// assert_eq!(&*devec, &[1, 2]);
     /// ```
     #[inline]
     #[must_use = "This DeVec's drop order has been changed. Please make sure to use the new DeVec or drop it explicitly."]
@@ -179,8 +179,8 @@ where
     ///
     /// # Examples
     /// ```
-    /// # use spaghetto::DeVec;
-    /// let mut devec = DeVec::new_with_drop_order::<BackToFront>();
+    /// use spaghetto::{DeVec, BackToFront};
+    /// let mut devec = DeVec::<_>::new_with_drop_order::<BackToFront>();
     /// devec.push_back(1);
     /// devec.push_back(2);
     /// assert_eq!(&*devec, &[1, 2]);
@@ -236,7 +236,7 @@ where
     /// # Examples
     /// ```
     /// use spaghetto::DeVec;
-    /// let mut devec = DeVec::with_capacity(10);
+    /// let mut devec : DeVec<i32> = DeVec::with_capacity(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
     /// assert!(devec.capacity() >= 10);
@@ -279,7 +279,8 @@ where
     /// # Examples
     /// ```
     /// # use spaghetto::DeVec;
-    /// let mut devec = DeVec::with_capacity_and_drop_order::<BackToFront>(10);
+    /// use spaghetto::BackToFront;
+    /// let mut devec = DeVec::<_>::with_capacity_and_drop_order::<BackToFront>(10);
     /// devec.push_back(1);
     /// devec.push_back(2);
     /// assert_eq!(&*devec, &[1, 2]);
@@ -298,11 +299,12 @@ where
     /// # Examples
     /// ```
     /// # use spaghetto::DeVec;
-    /// let mut devec = DeVec::new();
+    /// use spaghetto::BackToFront;
+    /// let mut devec = DeVec::<_>::new();
     /// devec.push_back(1);
     /// devec.push_back(2);
-    /// devec.with_drop_order::<BackToFront>();
-    /// assert_eq!(&*devec, &[2, 1]);
+    /// let devec = devec.with_drop_order::<BackToFront>();
+    /// assert_eq!(&*devec, &[1, 2]);
     /// ```
     #[inline]
     #[must_use]
@@ -618,12 +620,13 @@ where
     /// Returns the number of elements the `DeVec` can hold without reallocating.
     /// # Examples
     /// ```
+    /// # use spaghetto::DeVec;
     /// let mut vec: DeVec<i32> = DeVec::with_capacity(10);
     /// vec.push_back(42);
     /// assert!(vec.capacity() >= 10);
     /// assert_eq!(vec.len(), 1);
-    /// assert!(vec.remaining_space_front() > 1);
-    /// assert!(vec.remaining_space_front() < vec.capacity());
+    /// assert!(vec.space_front() > 1);
+    /// assert!(vec.space_front() < vec.capacity());
     /// ```
     #[inline]
     pub fn space_front(&self) -> usize {
@@ -638,8 +641,8 @@ where
     /// vec.push_back(42);
     /// assert!(vec.capacity() >= 10);
     /// assert_eq!(vec.len(), 1);
-    /// assert!(vec.remaining_space_back() > 1);
-    /// assert!(vec.remaining_space_back() < vec.capacity());
+    /// assert!(vec.space_back() > 1);
+    /// assert!(vec.space_back() < vec.capacity());
     /// ```
     #[inline]
     pub fn space_back(&self) -> usize {
@@ -1233,8 +1236,8 @@ where
     /// ```
     #[inline]
     pub fn rebalance(&mut self) {
-        let midpoint = self.len / 2;
-        let new_start = self.cap / 2 - midpoint;
+        let buffer_midpoint = self.cap / 2;
+        let new_start = buffer_midpoint - (self.len / 2);
         if self.start == new_start {
             return;
         }
@@ -1242,6 +1245,46 @@ where
             std::ptr::copy(
                 self.ptr.as_ptr().add(self.start),
                 self.ptr.as_ptr().add(new_start),
+                self.len,
+            );
+        }
+        self.start = new_start;
+    }
+
+    /// Shifts the elements of the DeVec to be centered to the location in the buffer specified by the index.
+    /// This can address imbalances in the buffer that may have been caused by repeated pushes or removals on one side.
+    /// 
+    /// # Panics
+    /// Panics if the index is larger than the length of the DeVec, or if the index would require writing out of bounds.
+    /// 
+    /// # Examples
+    /// ```
+    /// # use spaghetto::DeVec;
+    /// let mut devec : DeVec<i32> = DeVec::with_capacity(10);
+    /// devec.push_front(1);
+    /// devec.push_front(2);
+    /// devec.push_front(3);
+    /// devec.push_front(4);
+    /// // we should now be heavily imbalanced towards the front
+    /// let old_space_front = devec.space_front();
+    /// println!("old_space_front: {}", old_space_front);
+    /// devec.rebalance_to(5);
+    /// // we should be more balanced now
+    /// let new_space_front = devec.space_front();
+    /// println!("new_space_front: {}", new_space_front);
+    /// assert!(new_space_front >= old_space_front);
+    /// ```
+    #[inline]
+    pub fn rebalance_to(&mut self, index: usize) {
+        if self.start == index {
+            return;
+        }
+        assert!(index < self.cap, "attempt to rebalance DeVec of cap={}, with index {} is out of bounds", self.cap, index);
+        assert!((self.cap - index) >= self.len, "attempt to rebalance DeVec of len={}, cap={} with index {} would write out of bounds", self.len, self.cap, index);
+        unsafe {
+            std::ptr::copy(
+                self.ptr.as_ptr().add(self.start),
+                self.ptr.as_ptr().add(index),
                 self.len,
             );
         }
