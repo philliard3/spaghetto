@@ -1,3 +1,4 @@
+//! # spaghetto
 //! **spaghetto** is a library for creating double-ended data structures that can be rolled out or eaten on from either side.
 //! This includes the base structure [`DeVec`], a double-ended [`Vec`] that can be used as a deque, and [`DeString`], a double-ended alternative to [`String`].
 //!
@@ -39,6 +40,10 @@
 //! // It is contiguous and also mutated its starting position!
 //! assert_eq!(destring.as_str(), "hello world  ");
 //! ```
+
+////////////////////////////////////////////////////////////////////////////////
+
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub mod destring;
 pub use destring::DeString;
