@@ -386,9 +386,14 @@ impl DeString {
     /// destring.expect("this should panic");
     /// ```
     #[inline]
-    pub fn from_utf8(devec: DeVec<u8>) -> Result<Self, std::str::Utf8Error> {
-        let _ = std::str::from_utf8(&devec)?;
-        Ok(DeString { devec })
+    pub fn from_utf8(devec: DeVec<u8>) -> Result<Self, FromUtf8Error> {
+        match std::str::from_utf8(&devec) {
+            Ok(_) => Ok(DeString { devec }),
+            Err(error) => Err(FromUtf8Error {
+                error,
+                original_input: devec,
+            }),
+        }
     }
 
     /// Reinterprets a DeVec as a UTF-8 string. This is unsafe because it does not check if the DeVec input is a valid UTF-8 string.
@@ -806,6 +811,20 @@ pub(crate) mod serde_impls {
         }
     }
 }
+
+#[derive(Debug)]
+pub struct FromUtf8Error {
+    pub error: std::str::Utf8Error,
+    pub original_input: DeVec<u8>,
+}
+
+impl std::fmt::Display for FromUtf8Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.error)
+    }
+}
+
+impl std::error::Error for FromUtf8Error {}
 
 #[cfg(test)]
 mod tests {
