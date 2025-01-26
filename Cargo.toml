@@ -4,6 +4,9 @@ version = "0.0.4"
 edition = "2021"
 description = "A library for making double-ended data structures, like an always-contigouous double-ended queue (deque) and double-ended string."
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/philliard3/spaghetto.git"
+categories = ["data-structures"]
+keywords = ["vector","vec","string", "deque", "double-ended", "queue"]
 
 # [dependencies]
 [dev-dependencies]
