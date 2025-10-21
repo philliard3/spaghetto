@@ -251,8 +251,10 @@ where
     #[inline]
     #[must_use]
     pub fn with_capacity(cap: usize) -> Self {
-        let (cap, ptr) = if std::mem::size_of::<T>() == 0 {
-            (usize::MAX, NonNull::dangling())
+        let (cap, ptr, start) = if std::mem::size_of::<T>() == 0 {
+            (usize::MAX, NonNull::dangling(), 0)
+        } else if cap == 0 {
+            (0, NonNull::dangling(), 0)
         } else {
             let layout = Layout::array::<T>(cap).unwrap();
             let ptr = unsafe { std::alloc::alloc(layout) };
@@ -260,9 +262,8 @@ where
                 Some(p) => p,
                 None => std::alloc::handle_alloc_error(layout),
             };
-            (cap, ptr)
+            (cap, ptr, cap / 2)
         };
-        let start = if cap == 0 { 0 } else { cap / 2 };
         DeVec {
             ptr,
             start,
@@ -339,6 +340,42 @@ where
             cap: this.cap,
             drop_order: this.drop_order,
             rebalance: Default::default(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod with_capacity_tests {
+    #[test]
+    fn with_capacity_0() {
+        let devec: super::DeVec<u32> = super::DeVec::with_capacity(0);
+        assert_eq!(devec.capacity(), 0);
+        assert_eq!(devec.len(), 0);
+    }
+
+    #[test]
+    fn with_capacity_nonzero() {
+        // use seeding
+        use rand::{Rng, SeedableRng};
+        let seed = u64::MAX.wrapping_mul(0x42);
+        let iters = 50;
+        let items = 50;
+        let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+        for _i in 0..iters {
+            let cap: usize = rng.gen_range(1..=32);
+            let mut devec: super::DeVec<u32> = super::DeVec::with_capacity(cap);
+            for _item in 0..items {
+                let should_push_item: bool = rng.gen();
+                if !should_push_item {
+                    continue;
+                }
+                let random_push_back: bool = rng.gen();
+                if random_push_back {
+                    devec.push_back(42);
+                } else {
+                    devec.push_front(42);
+                }
+            }
         }
     }
 }
@@ -1084,7 +1121,7 @@ where
     /// assert_eq!(devec.as_slice(), &[1, 3, 5]);
     /// ```
     #[inline]
-    pub fn extract_if<F>(&mut self, f: F) -> ExtractIf<T, DropOrder, F, Rebalance>
+    pub fn extract_if<F>(&mut self, f: F) -> ExtractIf<'_, T, DropOrder, F, Rebalance>
     where
         F: FnMut(usize, &mut T) -> bool,
     {
@@ -1523,7 +1560,7 @@ where
     #[inline]
     fn clone(&self) -> Self {
         let mut new: DeVec<T, DropOrder, Rebalance> = DeVec::with_capacity(self.cap);
-        new.start = (new.cap / 2).saturating_sub(new.len / 2);
+        new.start = (new.cap / 2).saturating_sub((self.len + 1) / 2);
         new.len = 0;
         for (i, elem) in self.iter().enumerate() {
             let elem = elem.clone();
@@ -1538,6 +1575,32 @@ where
         // so that we have the right len when Drop is run in unwind.
         new.len = self.len;
         new
+    }
+}
+
+#[cfg(test)]
+mod clone_tests {
+    use super::*;
+    #[test]
+    fn test_clone() {
+        let mut devec: DeVec<i32> = DeVec::new();
+        devec.push_back(1);
+        devec.push_back(2);
+        devec.push_back(3);
+        let devec_clone = devec.clone();
+        let mut devec2: DeVec<i32> = DeVec::new();
+        devec2.push_front(1);
+        devec2.push_front(2);
+        devec2.push_front(3);
+        devec2.reverse();
+        let devec_clone = devec.clone();
+        assert_eq!(devec.as_slice(), devec_clone.as_slice());
+        assert_eq!(devec2.as_slice(), devec_clone.as_slice());
+    }
+
+    #[test]
+    fn test_clone_and_drop() {
+        let _ = crate::DeVec::<u32>::from_iter([0, 1]).clone();
     }
 }
 
